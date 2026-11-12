@@ -1,0 +1,278 @@
+---
+import { getCollection, render } from "astro:content";
+import Curso from "../../../layouts/Curso.astro";
+import Cabecera from "../../../components/Cabecera.astro";
+import Notebooks from "../../../components/Notebooks.astro";
+import { MODULOS, parseLeccion, lecciones, ejerciciosDe, tituloHtml, claveProgreso, nn } from "../../../lib/curso";
+import { modulosConAutoevaluacion, widgetsDe, widgetsDelModulo } from "../../../lib/interactivos";
+import { notebooksDe } from "../../../lib/notebooks-fs";
+
+export async function getStaticPaths() {
+  const readmes = await getCollection("modulos");
+  return MODULOS.map((modulo) => {
+    const entry = readmes.find((r) => parseLeccion(r, "modulos")?.modulo.numero === modulo.numero) ?? null;
+    return { params: { n: String(modulo.numero) }, props: { modulo, entry } };
+  });
+}
+
+const { modulo, entry } = Astro.props;
+const rendered = entry ? await render(entry) : null;
+const Content = rendered?.Content ?? null;
+const headings = rendered?.headings ?? [];
+
+const todas = await lecciones();
+const propias = todas.filter((l) => l.modulo.numero === modulo.numero);
+const visualizadores = widgetsDelModulo(modulo.numero).map((w) => ({ ...w, leccionPublicada: propias.find((l) => claveProgreso(l) === w.leccion) ?? null }));
+const ejercicios = await ejerciciosDe(modulo.numero);
+const practicas = ejercicios.filter((e) => !e.taller);
+const talleres = ejercicios.filter((e) => e.taller);
+const tieneAuto = (await modulosConAutoevaluacion()).has(modulo.numero);
+const numNotebooks = notebooksDe(modulo.numero).length;
+const vacio = propias.length === 0;
+
+// Sesión siguiente/anterior
+const i = MODULOS.findIndex((m) => m.numero === modulo.numero);
+const prevMod = i > 0 ? MODULOS[i - 1] : null;
+const nextMod = i < MODULOS.length - 1 ? MODULOS[i + 1] : null;
+---
+
+<Curso title={`Sesión ${modulo.numero} · ${modulo.nombre}`} moduloActivo={modulo.numero} headings={headings} tipo="Sesión">
+  <Cabecera eyebrow={`Sesión ${modulo.numero} · ${modulo.horas} h · ${modulo.raa.join(" · ")}`} titulo={modulo.nombre} headings={headings}>
+    {vacio ? (
+      <span class="chip">En construcción</span>
+    ) : (
+      <>
+        <span class="chip gold">{propias.length} lecciones</span>
+        {numNotebooks > 0 && <span class="chip">{numNotebooks} prácticas en R</span>}
+        {practicas.length > 0 && <span class="chip">{practicas.length} ejercicios</span>}
+        {tieneAuto && <span class="chip">Autoevaluación</span>}
+        <span class="chip">{modulo.peso}</span>
+      </>
+    )}
+  </Cabecera>
+
+  {!vacio && (
+    <section class="ruta rise">
+      <div class="ruta-head">
+        <span class="eyebrow">Ruta de la sesión</span>
+        <span class="ruta-pct" data-porcentaje-modulo={modulo.numero}>0%</span>
+      </div>
+      <div class="ruta-barra" aria-hidden="true"><span class="fill" data-progreso-modulo={modulo.numero}></span></div>
+      <ol class="ruta-lista">
+        {propias.map((l) => (
+          <li>
+            <a href={l.ruta}>
+              <span class="marca" data-marca={claveProgreso(l)} aria-hidden="true"></span>
+              <span class="n">{nn(l.orden)}</span>
+              <span class="t" set:html={tituloHtml(l.titulo)} />
+              <span class="s">{widgetsDe(claveProgreso(l)).length > 0 && <span class="w" title="Con visualizador">◈</span>}{l.tema}</span>
+            </a>
+          </li>
+        ))}
+      </ol>
+      {(ejercicios.length > 0 || tieneAuto) && (
+        <div class="ruta-extra">
+          {tieneAuto && <a href={`/sesion/${modulo.numero}/autoevaluacion/`} class="btn btn-primary btn-sm">Autoevaluación</a>}
+          {practicas.map((e) => (
+            <a href={e.ruta} class="btn btn-ghost btn-sm">{e.rotulo}</a>
+          ))}
+          {talleres.map((e) => (
+            <a href={e.ruta} class="btn btn-ghost btn-sm">{e.rotulo}{e.peso ? ` · ${e.peso}` : ""}</a>
+          ))}
+        </div>
+      )}
+    </section>
+  )}
+
+  {!vacio && <Notebooks modulo={modulo.numero} />}
+
+  {visualizadores.length > 0 && (
+    <section class="vis rise d1" aria-labelledby="vis-titulo">
+      <div class="vis-head">
+        <span class="eyebrow" id="vis-titulo">Visualizadores</span>
+        <span class="vis-nota">Interactivos de la sesión; cada uno vive dentro de su lección{vacio ? " (aún por publicar)" : ""}.</span>
+      </div>
+      <ul class="vis-lista">
+        {visualizadores.map((w) => (
+          <li>
+            <span class="w" aria-hidden="true">◈</span>
+            <div>
+              <a href={w.leccionPublicada ? `${w.leccionPublicada.ruta}#explora` : `/widgets/${w.archivo}`} target={w.leccionPublicada ? undefined : "_blank"} rel={w.leccionPublicada ? undefined : "noopener"}>{w.titulo}</a>
+              {w.leccionPublicada ? (
+                <span class="vis-lec">Lección {nn(w.leccionPublicada.orden)} · <span set:html={tituloHtml(w.leccionPublicada.titulo)} /></span>
+              ) : (
+                <span class="vis-lec">Lección en construcción · <a href={`/widgets/${w.archivo}`} target="_blank" rel="noopener">abrir aparte ↗</a></span>
+              )}
+            </div>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )}
+
+  {Content && (
+    <article class="prose rise d2">
+      <Content />
+    </article>
+  )}
+
+  <nav class="mods rise d3" aria-label="Otras sesiones">
+    {prevMod ? <a href={`/sesion/${prevMod.numero}/`} class="btn btn-ghost btn-sm">← Sesión {prevMod.numero}: {prevMod.corto}</a> : <a href="/pre-trabajos/" class="btn btn-ghost btn-sm">← Pre-trabajos</a>}
+    {nextMod ? <a href={`/sesion/${nextMod.numero}/`} class="btn btn-ghost btn-sm">Sesión {nextMod.numero}: {nextMod.corto} →</a> : <a href="/recursos/" class="btn btn-ghost btn-sm">Recursos →</a>}
+  </nav>
+</Curso>
+<style>
+  .ruta {
+    max-width: 72ch;
+    margin-bottom: 40px;
+    padding: 20px 22px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+  }
+  .ruta-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .ruta-pct {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--gold);
+  }
+  .ruta-barra {
+    height: 4px;
+    border-radius: 4px;
+    background: var(--line-strong);
+    overflow: hidden;
+    margin-top: 10px;
+  }
+  .ruta-barra .fill {
+    display: block;
+    height: 100%;
+    width: 0;
+    background: var(--gold);
+    transition: width 0.4s;
+  }
+  .ruta-lista {
+    list-style: none;
+    margin-top: 12px;
+  }
+  .ruta-lista a {
+    display: grid;
+    grid-template-columns: 14px 30px 1fr auto;
+    gap: 10px;
+    align-items: baseline;
+    padding: 9px 6px;
+    border-bottom: 1px solid var(--line);
+    border-radius: 6px;
+    transition: background 0.2s;
+  }
+  .ruta-lista li:last-child a {
+    border-bottom: 0;
+  }
+  .ruta-lista a:hover {
+    background: var(--surface-2);
+  }
+  .ruta-lista .marca {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 1.5px solid var(--line-strong);
+    align-self: center;
+  }
+  .ruta-lista .marca.hecha {
+    border-color: var(--ok);
+    background: var(--ok);
+  }
+  .ruta-lista .n {
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    color: var(--gold);
+  }
+  .ruta-lista .t {
+    font-size: 15px;
+  }
+  .ruta-lista .t :global(code) {
+    font-family: var(--font-mono);
+    font-size: 0.9em;
+    color: var(--gold);
+  }
+  .ruta-lista .s {
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    color: var(--muted-2);
+  }
+  .ruta-lista .w {
+    color: var(--silver);
+    margin-right: 8px;
+  }
+  .ruta-extra {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid var(--line);
+  }
+  .vis {
+    max-width: 72ch;
+    margin-bottom: 40px;
+  }
+  .vis-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 6px 14px;
+    margin-bottom: 10px;
+  }
+  .vis-nota {
+    font-size: 13.5px;
+    color: var(--muted);
+  }
+  .vis-lista {
+    list-style: none;
+    display: grid;
+    gap: 8px;
+  }
+  .vis-lista li {
+    display: grid;
+    grid-template-columns: 18px 1fr;
+    gap: 10px;
+    align-items: baseline;
+    padding: 12px 16px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+  }
+  .vis-lista .w {
+    color: var(--silver);
+  }
+  .vis-lista li > div > a {
+    font-weight: 600;
+    font-size: 15px;
+  }
+  .vis-lec {
+    display: block;
+    margin-top: 2px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--muted-2);
+  }
+  .vis-lec a {
+    color: var(--gold);
+  }
+  .vis-lec :global(code) {
+    font-family: var(--font-mono);
+  }
+  .mods {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 48px;
+    padding-top: 24px;
+    border-top: 1px solid var(--line);
+    max-width: 72ch;
+  }
+</style>

@@ -1,0 +1,63 @@
+---
+/** Índice de la página (columna derecha, ≥1280 px). Resalta la sección visible (scripts/toc.ts). */
+import type { MarkdownHeading } from "astro";
+
+interface Props {
+  headings: MarkdownHeading[];
+}
+const { headings } = Astro.props;
+const items = headings.filter((h) => h.depth === 2 || h.depth === 3);
+---
+
+{items.length > 0 && (
+  <nav class="toc" aria-label="Contenido de la página" data-toc>
+    <span class="toc-titulo">En esta página</span>
+    <ol>
+      {items.map((h) => (
+        <li class:list={[`d${h.depth}`]}>
+          <a href={`#${h.slug}`} data-toc-link={h.slug}>{h.text}</a>
+        </li>
+      ))}
+    </ol>
+  </nav>
+)}
+
+<style>
+  .toc {
+    font-size: 13px;
+    line-height: 1.4;
+  }
+  .toc-titulo {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 12px;
+  }
+  .toc ol {
+    list-style: none;
+    border-left: 1px solid var(--line);
+  }
+  .toc li a {
+    display: block;
+    padding: 5px 0 5px 14px;
+    margin-left: -1px;
+    border-left: 1px solid transparent;
+    color: var(--muted);
+    transition: color 0.2s, border-color 0.2s;
+  }
+  .toc li.d3 a {
+    padding-left: 26px;
+    font-size: 12.5px;
+    color: var(--muted-2);
+  }
+  .toc li a:hover {
+    color: var(--text);
+  }
+  .toc li a.activo {
+    color: var(--gold);
+    border-left-color: var(--gold);
+  }
+</style>

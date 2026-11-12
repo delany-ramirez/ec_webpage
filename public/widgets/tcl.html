@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="es" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Teorema Central del Límite</title>
+  <!-- Contrato: ver _plantilla.html (tema por ?theme= y postMessage; alto con WIDGET_HEIGHT). -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0d1219; --card: #151c27; --card-2: #1b2431;
+      --line: rgba(232,236,242,.12); --text: #e9edf3; --muted: #8b96a8;
+      --accent: #e3b058; --accent-soft: rgba(227,176,88,.16);
+      --ok: #5fd08a; --err: #e0705f; --info: #7fb2e5;
+      --font: "IBM Plex Sans", system-ui, sans-serif; --mono: "IBM Plex Mono", monospace;
+      color-scheme: dark;
+    }
+    :root[data-theme="light"] {
+      --bg: #f7f5f0; --card: #ffffff; --card-2: #efece5;
+      --line: rgba(13,18,25,.12); --text: #141a22; --muted: #5b6673;
+      --accent: #b8862f; --accent-soft: rgba(184,134,47,.16);
+      --ok: #2f9e5b; --err: #c2483a; --info: #2f6fb0;
+      color-scheme: light;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { background: var(--bg); color: var(--text); font-family: var(--font); font-size: 14px; }
+    body { padding: 14px; }
+    .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px; }
+    .mono { font-family: var(--mono); }
+    h1 { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+    p.sub { color: var(--muted); font-size: 13px; margin-bottom: 12px; }
+    label { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+    input[type="range"] { accent-color: var(--accent); width: 100%; }
+    select, button { font: inherit; font-family: var(--mono); font-size: 12.5px; color: var(--text); background: var(--card-2);
+             border: 1px solid var(--line); border-radius: 8px; padding: 7px 10px; cursor: pointer; }
+    button:hover { border-color: var(--accent); color: var(--accent); }
+    .controles { display: grid; grid-template-columns: 1.2fr 1fr auto; gap: 12px 16px; align-items: end; margin-bottom: 14px; }
+    .controles select { width: 100%; }
+    .controles > div { display: flex; flex-direction: column; gap: 5px; }
+    .graficos { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .panel { background: var(--card-2); border: 1px solid var(--line); border-radius: 10px; padding: 10px; }
+    .panel h2 { font-family: var(--mono); font-size: 11.5px; font-weight: 500; color: var(--muted); margin-bottom: 6px; letter-spacing: .02em; }
+    canvas { width: 100%; height: 190px; display: block; }
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 12px; }
+    .stat { background: var(--card-2); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; }
+    .stat .k { font-family: var(--mono); font-size: 11px; color: var(--muted); display: block; }
+    .stat .v { font-family: var(--mono); font-size: 15px; }
+    .stat .v.acc { color: var(--accent); }
+    .nota { margin-top: 12px; font-size: 13px; color: var(--muted); line-height: 1.5; }
+    .nota strong { color: var(--text); font-weight: 500; }
+    @media (max-width: 560px) {
+      .controles { grid-template-columns: 1fr 1fr; }
+      .graficos { grid-template-columns: 1fr; }
+      .stats { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Teorema Central del Límite: datos individuales frente a medias</h1>
+    <p class="sub">Se toman 3000 muestras de tamaño <span class="mono">n</span> de la población elegida y se grafica la media de cada una.</p>
+    <div class="controles">
+      <div>
+        <label for="pob">población</label>
+        <select id="pob">
+          <option value="normal">Normal · volumen de llenado</option>
+          <option value="expo" selected>Asimétrica · tiempo de atención</option>
+          <option value="unif">Uniforme · 0 a 10</option>
+          <option value="bimodal">Bimodal · dos boquillas</option>
+        </select>
+      </div>
+      <div>
+        <label for="n">tamaño de muestra n = <span id="n-v" class="mono">5</span></label>
+        <input id="n" type="range" min="1" max="60" step="1" value="5" />
+      </div>
+      <div>
+        <button id="otra" type="button">Otra simulación</button>
+      </div>
+    </div>
+    <div class="graficos">
+      <div class="panel">
+        <h2>DATOS INDIVIDUALES (población)</h2>
+        <canvas id="c-pob"></canvas>
+      </div>
+      <div class="panel">
+        <h2>MEDIAS DE 3000 MUESTRAS · curva N(μ, σ²/n)</h2>
+        <canvas id="c-med"></canvas>
+      </div>
+    </div>
+    <div class="stats">
+      <div class="stat"><span class="k">μ · σ población</span><span class="v" id="s-pob">—</span></div>
+      <div class="stat"><span class="k">ee teórico σ/√n</span><span class="v acc" id="s-ee">—</span></div>
+      <div class="stat"><span class="k">ee observado</span><span class="v" id="s-eeo">—</span></div>
+      <div class="stat"><span class="k">asimetría de las medias</span><span class="v" id="s-asim">—</span></div>
+    </div>
+    <p class="nota" id="nota"></p>
+  </div>
+
+  <script>
+    // --- tema: inicial por ?theme=, en vivo por postMessage ---
+    (function () {
+      var q = new URLSearchParams(location.search).get("theme");
+      if (q === "light" || q === "dark") document.documentElement.setAttribute("data-theme", q);
+      window.addEventListener("message", function (e) {
+        var d = e.data || {};
+        if (d.type === "THEME_CHANGE" && (d.theme === "light" || d.theme === "dark")) {
+          document.documentElement.setAttribute("data-theme", d.theme);
+          dibujar();
+        }
+      });
+    })();
+    // --- alto real → padre ---
+    (function () {
+      function avisar() {
+        var h = document.documentElement.scrollHeight;
+        if (window.parent !== window) window.parent.postMessage({ type: "WIDGET_HEIGHT", height: h }, "*");
+      }
+      window.addEventListener("load", avisar);
+      if (window.ResizeObserver) new ResizeObserver(avisar).observe(document.body);
+    })();
+
+    // --- generador reproducible ---
+    function mulberry32(a) {
+      return function () {
+        a |= 0; a = (a + 0x6d2b79f5) | 0;
+        var t = Math.imul(a ^ (a >>> 15), 1 | a);
+        t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+      };
+    }
+    var semilla = 7, rnd = mulberry32(semilla);
+    function rnorm() {
+      var u = 0, v = 0;
+      while (u === 0) u = rnd();
+      v = rnd();
+      return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+    }
+
+    var POBLACIONES = {
+      normal: { mu: 500, sigma: 2, gen: function () { return 500 + 2 * rnorm(); }, rango: [492, 508], unidad: "mL" },
+      expo: { mu: 8, sigma: 8, gen: function () { return -8 * Math.log(1 - rnd()); }, rango: [0, 40], unidad: "min" },
+      unif: { mu: 5, sigma: 10 / Math.sqrt(12), gen: function () { return 10 * rnd(); }, rango: [0, 10], unidad: "" },
+      bimodal: { mu: 500, sigma: Math.sqrt(1 + 9), gen: function () { return (rnd() < 0.5 ? 497 : 503) + rnorm(); }, rango: [492, 508], unidad: "mL" },
+    };
+
+    var $ = function (id) { return document.getElementById(id); };
+    var estado = null;
+    var REPS = 3000;
+
+    function simular() {
+      rnd = mulberry32(semilla);
+      var p = POBLACIONES[$("pob").value];
+      var n = Number($("n").value);
+      var datos = [], medias = [];
+      for (var i = 0; i < 6000; i++) datos.push(p.gen());
+      for (var r = 0; r < REPS; r++) {
+        var s = 0;
+        for (var j = 0; j < n; j++) s += p.gen();
+        medias.push(s / n);
+      }
+      var ee = p.sigma / Math.sqrt(n);
+      var m = medias.reduce(function (a, b) { return a + b; }, 0) / REPS;
+      var eeo = Math.sqrt(medias.reduce(function (a, b) { return a + (b - m) * (b - m); }, 0) / (REPS - 1));
+      // Coeficiente de asimetría de las medias (0 para una normal).
+      var asim = medias.reduce(function (a, b) { return a + Math.pow((b - m) / eeo, 3); }, 0) / REPS;
+      estado = { p: p, n: n, datos: datos, medias: medias, ee: ee, eeo: eeo };
+
+      $("n-v").textContent = n;
+      var u = p.unidad ? " " + p.unidad : "";
+      $("s-pob").textContent = fmt(p.mu) + " · " + fmt(p.sigma);
+      $("s-ee").textContent = fmt(ee) + u;
+      $("s-eeo").textContent = fmt(eeo) + u;
+      $("s-asim").textContent = asim.toFixed(2);
+
+      var tipo = $("pob").value;
+      var nota;
+      if (tipo === "normal") nota = "Con datos normales, las medias son normales <strong>para cualquier n</strong>: el TCL no hace falta. Mira cómo el ancho baja como 1/√n.";
+      else if (n === 1) nota = "Con n = 1 la «media» es un dato individual: su distribución es la de la población. Sube n y observa cómo cambia la forma.";
+      else if (tipo === "expo" && n < 30) nota = "La población es muy asimétrica: con n = " + n + " las medias aún conservan una cola a la derecha (asimetría ≈ " + asim.toFixed(2) + "; la de una normal es 0). <strong>n = 30 no es una regla universal</strong>: depende de la asimetría.";
+      else if (tipo === "bimodal") nota = "La población es una mezcla (bimodal); aun así las medias se vuelven normales rápido. Pero ojo: el TCL <strong>no</strong> autoriza a calcular la fracción de envases fuera de especificación con una normal: eso depende de los datos individuales.";
+      else nota = "Las medias ya son aproximadamente normales aunque los datos no lo sean. El TCL habla de <strong>ȳ</strong>, no de cada unidad: la población sigue siendo la misma del panel izquierdo.";
+      $("nota").innerHTML = nota;
+      dibujar();
+    }
+
+    function fmt(x) {
+      var a = Math.abs(x);
+      return a >= 100 ? x.toFixed(1) : a >= 10 ? x.toFixed(2) : x.toFixed(3);
+    }
+
+    function color(v) { return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
+
+    function prepararCanvas(c) {
+      var dpr = window.devicePixelRatio || 1;
+      var w = c.clientWidth, h = c.clientHeight;
+      c.width = Math.round(w * dpr); c.height = Math.round(h * dpr);
+      var ctx = c.getContext("2d");
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, w, h);
+      return { ctx: ctx, w: w, h: h };
+    }
+
+    function histograma(c, valores, rango, opciones) {
+      var g = prepararCanvas(c), ctx = g.ctx, w = g.w, h = g.h;
+      var izq = 6, der = 6, arr = 8, abj = 20;
+      var a = rango[0], b = rango[1], K = 40, ancho = (b - a) / K;
+      var cuentas = new Array(K).fill(0);
+      valores.forEach(function (x) {
+        var k = Math.floor((x - a) / ancho);
+        if (k >= 0 && k < K) cuentas[k]++;
+      });
+      var dens = cuentas.map(function (n) { return n / (valores.length * ancho); });
+      var maxD = Math.max.apply(null, dens);
+      if (opciones.curva) {
+        var pico = 1 / (opciones.curva.sd * Math.sqrt(2 * Math.PI));
+        maxD = Math.max(maxD, pico);
+      }
+      maxD *= 1.08;
+      var X = function (x) { return izq + ((x - a) / (b - a)) * (w - izq - der); };
+      var Y = function (d) { return h - abj - (d / maxD) * (h - abj - arr); };
+
+      ctx.fillStyle = opciones.relleno;
+      ctx.globalAlpha = opciones.alfa || 1;
+      for (var k = 0; k < K; k++) {
+        var x0 = X(a + k * ancho), x1 = X(a + (k + 1) * ancho);
+        ctx.fillRect(x0 + 0.5, Y(dens[k]), Math.max(1, x1 - x0 - 1), h - abj - Y(dens[k]));
+      }
+      ctx.globalAlpha = 1;
+      if (opciones.curva) {
+        ctx.strokeStyle = color("--accent"); ctx.lineWidth = 2; ctx.beginPath();
+        for (var i = 0; i <= 200; i++) {
+          var x = a + (i / 200) * (b - a);
+          var z = (x - opciones.curva.mu) / opciones.curva.sd;
+          var d = Math.exp(-z * z / 2) / (opciones.curva.sd * Math.sqrt(2 * Math.PI));
+          if (i === 0) ctx.moveTo(X(x), Y(d)); else ctx.lineTo(X(x), Y(d));
+        }
+        ctx.stroke();
+      }
+      // μ
+      ctx.strokeStyle = color("--muted"); ctx.setLineDash([4, 4]); ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(X(opciones.mu), arr); ctx.lineTo(X(opciones.mu), h - abj); ctx.stroke(); ctx.setLineDash([]);
+      // eje
+      ctx.strokeStyle = color("--line"); ctx.beginPath(); ctx.moveTo(izq, h - abj + 0.5); ctx.lineTo(w - der, h - abj + 0.5); ctx.stroke();
+      ctx.fillStyle = color("--muted"); ctx.font = "11px " + color("--mono");
+      ctx.textAlign = "left"; ctx.fillText(String(a), izq, h - 5);
+      ctx.textAlign = "right"; ctx.fillText(String(b), w - der, h - 5);
+      ctx.textAlign = "center"; ctx.fillText("μ = " + opciones.mu, X(opciones.mu), h - 5);
+    }
+
+    function dibujar() {
+      if (!estado) return;
+      var p = estado.p;
+      histograma($("c-pob"), estado.datos, p.rango, { relleno: color("--info"), mu: p.mu });
+      histograma($("c-med"), estado.medias, p.rango, { relleno: color("--accent"), alfa: 0.45, mu: p.mu, curva: { mu: p.mu, sd: estado.ee } });
+    }
+
+    $("pob").addEventListener("change", simular);
+    $("n").addEventListener("input", simular);
+    $("otra").addEventListener("click", function () { semilla++; simular(); });
+    window.addEventListener("resize", dibujar);
+    simular();
+  </script>
+</body>
+</html>

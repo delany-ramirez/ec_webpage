@@ -1,0 +1,95 @@
+---
+import { getCollection, render } from "astro:content";
+import Curso from "../../../../layouts/Curso.astro";
+import Cabecera from "../../../../components/Cabecera.astro";
+import PrevNext from "../../../../components/PrevNext.astro";
+import NotebooksCitados from "../../../../components/NotebooksCitados.astro";
+import { urlPaquete } from "../../../../lib/rutas";
+import { parseLeccion, ejerciciosDe, tituloTexto, etiquetaSesion, nn } from "../../../../lib/curso";
+import { practicasDeEjercicio } from "../../../../lib/notebooks-fs";
+
+export async function getStaticPaths() {
+  const entradas = await getCollection("ejercicios");
+  return entradas.flatMap((entry) => {
+    const leccion = parseLeccion(entry, "ejercicios");
+    if (!leccion) return [];
+    return [{ params: { n: String(leccion.modulo.numero), slug: leccion.slug }, props: { entry, leccion } }];
+  });
+}
+
+const { entry, leccion } = Astro.props;
+const { Content, headings } = await render(entry);
+const practicas = leccion.taller ? [] : practicasDeEjercicio(leccion.modulo.numero, leccion.orden);
+
+// Anterior/siguiente dentro de los ejercicios de la misma sesión (el taller va al final).
+const hermanos = await ejerciciosDe(leccion.modulo.numero);
+const i = hermanos.findIndex((e) => e.id === leccion.id);
+const prev = i > 0 ? hermanos[i - 1] : null;
+const next = i < hermanos.length - 1 ? hermanos[i + 1] : null;
+---
+
+<Curso title={`${leccion.taller ? leccion.rotulo.replace("Taller", "Taller integrador") : `Ejercicio ${nn(leccion.orden)}`} · ${tituloTexto(leccion.titulo)}`} activo={leccion.id} moduloActivo={leccion.modulo.numero} headings={headings} tipo={leccion.taller ? "Taller" : "Ejercicio"}>
+  <Cabecera
+    eyebrow={`${etiquetaSesion(leccion)} · ${leccion.taller ? leccion.rotulo.replace("Taller", "Taller integrador") : `Ejercicio ${nn(leccion.orden)}`}`}
+    titulo={leccion.titulo}
+    numero={leccion.taller ? undefined : nn(leccion.orden)}
+    headings={headings}
+  >
+    <span class="chip gold">{leccion.modulo.corto}</span>
+    {leccion.tema && <span class="chip">{leccion.tema}</span>}
+    {leccion.duracion && <span class="chip">⏱ {leccion.duracion}</span>}
+    {leccion.peso && <span class="chip">Calificable · {leccion.peso}</span>}
+  </Cabecera>
+
+  {practicas.length > 0 && (
+    <aside class="apoyo rise d1">
+      <NotebooksCitados practicas={practicas} etiqueta="Práctica de apoyo" />
+    </aside>
+  )}
+
+  <article class="prose rise d1">
+    <Content />
+  </article>
+
+  <aside class="aviso rise d2" data-pagefind-ignore>
+    {leccion.taller ? (
+      <><strong>Entrega.</strong> El taller se entrega en la plataforma al cierre de la sesión: la plantilla <code>.Rmd</code> diligenciada y el <code>.html</code> compilado. Su solución es material del docente y no se publica.</>
+    ) : (
+      <><strong>Archivos.</strong> Descarga el <a href={urlPaquete(leccion.modulo.carpeta)} download>material de la sesión (.zip)</a>: trae las prácticas, los datos y los enunciados con la estructura de carpetas que esperan las rutas <code>../datos/</code>.</>
+    )}
+  </aside>
+
+  <PrevNext prev={prev} next={next} etiquetas={["← Ejercicio anterior", "Ejercicio siguiente →"]} />
+</Curso>
+
+<style>
+  .apoyo {
+    max-width: 72ch;
+    margin-bottom: 28px;
+    padding: 14px 18px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+  }
+  .aviso {
+    margin-top: 40px;
+    max-width: 72ch;
+    font-size: 14px;
+    color: var(--muted);
+    border: 1px dashed var(--line-strong);
+    border-radius: 10px;
+    padding: 14px 18px;
+  }
+  .aviso strong {
+    color: var(--text);
+  }
+  .aviso a {
+    color: var(--gold);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .aviso code {
+    font-family: var(--font-mono);
+    font-size: 0.9em;
+  }
+</style>

@@ -1,0 +1,200 @@
+{
+  "modulo": 2,
+  "preguntas": [
+    {
+      "id": "s2-01",
+      "leccion": "01-pruebas-t-varianzas",
+      "pregunta": "Se mide la rugosidad de 15 piezas antes y después de un pulido. ¿Qué prueba corresponde?",
+      "opciones": [
+        "t de dos muestras independientes (Welch)",
+        "Prueba F de razón de varianzas",
+        "t pareada sobre las diferencias",
+        "t de una muestra contra la rugosidad nominal"
+      ],
+      "correcta": 2,
+      "explicacion": "Las mismas unidades se miden en ambas condiciones: se analizan las diferencias dᵢ. El emparejamiento elimina la variabilidad entre piezas del error."
+    },
+    {
+      "id": "s2-02",
+      "leccion": "01-pruebas-t-varianzas",
+      "pregunta": "Datos pareados (dos durómetros sobre las mismas 12 probetas) se analizan por error como dos muestras independientes. ¿Qué suele pasar?",
+      "opciones": [
+        "La variabilidad entre probetas queda en el denominador y puede ocultar una diferencia real",
+        "Se obtiene el mismo valor p",
+        "La prueba se vuelve demasiado liberal y rechaza siempre",
+        "Solo cambian los grados de libertad, no la conclusión"
+      ],
+      "correcta": 0,
+      "explicacion": "Al ignorar el emparejamiento, la diferencia entre probetas (que puede ser grande) infla el error estándar y la prueba pierde potencia. Es el antecedente directo del bloqueo en ASC22."
+    },
+    {
+      "id": "s2-03",
+      "leccion": "01-pruebas-t-varianzas",
+      "pregunta": "Quieres comparar la dispersión de dos líneas, pero los datos se alejan claramente de la normalidad. ¿Qué usas?",
+      "opciones": [
+        "La prueba F (var.test)",
+        "La t de Welch",
+        "La t combinada",
+        "La prueba de Levene"
+      ],
+      "correcta": 3,
+      "explicacion": "La F es muy sensible a la no normalidad; Levene (car::leveneTest) es más robusta. Las pruebas t comparan medias, no dispersiones."
+    },
+    {
+      "id": "s2-04",
+      "leccion": "02-potencia-tamano-muestra",
+      "pregunta": "Para detectar la mitad de la diferencia δ con la misma potencia, α y σ, el tamaño de muestra por grupo debe…",
+      "opciones": [
+        "Duplicarse",
+        "Cuadruplicarse",
+        "Aumentar en √2",
+        "Mantenerse igual"
+      ],
+      "correcta": 1,
+      "explicacion": "n ≈ 2(z_{α/2} + z_β)²σ²/δ²: n es inversamente proporcional a δ². Con δ/2, n se multiplica por 4."
+    },
+    {
+      "id": "s2-05",
+      "leccion": "02-potencia-tamano-muestra",
+      "pregunta": "Un estudio con n = 8 por grupo no encontró diferencia significativa. ¿Qué preguntarías antes de concluir que «no hay efecto»?",
+      "opciones": [
+        "Si el valor p fue menor que 0.10",
+        "Si se usó Welch o la t combinada",
+        "Qué potencia tenía el estudio para detectar la diferencia de importancia práctica",
+        "Si los datos se recogieron en un solo turno"
+      ],
+      "correcta": 2,
+      "explicacion": "Con n pequeño el riesgo de error tipo II es alto: el «no significativo» puede deberse a falta de potencia, no a ausencia de efecto. La potencia se calcula para un δ que define el dueño del proceso."
+    },
+    {
+      "id": "s2-06",
+      "leccion": "02-potencia-tamano-muestra",
+      "pregunta": "Si mejoras el sistema de medición y σ se reduce a la mitad, ¿qué pasa con el n necesario?",
+      "opciones": [
+        "Se reduce a la cuarta parte",
+        "Se reduce a la mitad",
+        "No cambia",
+        "Se duplica"
+      ],
+      "correcta": 0,
+      "explicacion": "n es proporcional a σ². Reducir la variabilidad (mejor medición, bloqueo, emparejamiento) es tan eficaz como aumentar n."
+    },
+    {
+      "id": "s2-07",
+      "leccion": "03-puente-anova",
+      "pregunta": "Con 5 proveedores hay 10 comparaciones por pares. Si cada t se hace con α = 0.05, ¿cuál es aproximadamente la probabilidad de al menos una falsa alarma?",
+      "opciones": [
+        "0.05",
+        "0.40",
+        "0.10",
+        "0.50"
+      ],
+      "correcta": 1,
+      "explicacion": "1 − (1 − 0.05)¹⁰ = 1 − 0.95¹⁰ ≈ 0.40. Por eso el ANOVA compara todas las medias en una sola prueba."
+    },
+    {
+      "id": "s2-08",
+      "leccion": "03-puente-anova",
+      "pregunta": "SC_T = 120 y SC_E = 90, con a = 4 grupos y N = 24 observaciones. ¿Cuánto vale F₀?",
+      "opciones": [
+        "1.33",
+        "4.50",
+        "0.75",
+        "2.22"
+      ],
+      "correcta": 3,
+      "explicacion": "SC_Entre = 120 − 90 = 30; CM_Entre = 30/(4 − 1) = 10; CM_E = 90/(24 − 4) = 4.5; F₀ = 10/4.5 ≈ 2.22."
+    },
+    {
+      "id": "s2-09",
+      "leccion": "03-puente-anova",
+      "pregunta": "¿Qué indica un F₀ cercano a 1 en el ANOVA?",
+      "opciones": [
+        "Que la variación entre grupos es comparable al ruido dentro de los grupos",
+        "Que las medias de los grupos son muy diferentes",
+        "Que las varianzas de los grupos son distintas",
+        "Que el modelo explica el 100 % de la variabilidad"
+      ],
+      "correcta": 0,
+      "explicacion": "Bajo H₀ ambos cuadrados medios estiman σ², y F₀ ≈ 1. Si las medias difieren, CM_Entre crece y F₀ ≫ 1."
+    },
+    {
+      "id": "s2-10",
+      "leccion": "04-correlacion-regresion",
+      "pregunta": "Entre temperatura y rendimiento se obtiene r = 0.05. ¿Qué puedes concluir?",
+      "opciones": [
+        "La temperatura no afecta el rendimiento",
+        "Hay una relación causal débil",
+        "No hay relación lineal apreciable; podría haber una relación curva, así que hay que graficar",
+        "El R² de la regresión simple es 0.05"
+      ],
+      "correcta": 2,
+      "explicacion": "r mide solo asociación lineal: una relación en forma de U puede dar r ≈ 0. Además, correlación no implica causalidad. (En simple, R² = r² = 0.0025, no 0.05.)"
+    },
+    {
+      "id": "s2-11",
+      "leccion": "04-correlacion-regresion",
+      "pregunta": "Necesitas saber dónde caerá la resistencia de la próxima probeta curada a 80 °C. ¿Qué intervalo usas?",
+      "opciones": [
+        "El IC para la respuesta media",
+        "El intervalo de predicción",
+        "El IC de la pendiente β₁",
+        "El intervalo ȳ ± 2s de los datos"
+      ],
+      "correcta": 1,
+      "explicacion": "Para una observación individual nueva se usa el intervalo de predicción, que incluye σ² además de la incertidumbre de la recta; por eso nunca es más angosto que el IC para la media."
+    },
+    {
+      "id": "s2-12",
+      "leccion": "04-correlacion-regresion",
+      "pregunta": "En un modelo múltiple, β̂₁ = 0.056 MPa/°C para la temperatura. ¿Cómo se interpreta?",
+      "opciones": [
+        "Cada grado adicional aumenta la resistencia de cada probeta en 0.056 MPa",
+        "La temperatura explica el 5.6 % de la variabilidad",
+        "La correlación entre temperatura y resistencia es 0.056",
+        "Por cada °C, la resistencia media aumenta 0.056 MPa, manteniendo constantes las demás variables"
+      ],
+      "correcta": 3,
+      "explicacion": "Un coeficiente describe el cambio en la media de y por unidad de xⱼ, con los demás predictores fijos. No es un efecto garantizado en cada unidad ni una proporción de varianza explicada."
+    },
+    {
+      "id": "s2-13",
+      "leccion": "05-supuestos-diagnostico",
+      "pregunta": "En el gráfico de residuales vs. ajustados, la dispersión crece con el valor ajustado (forma de embudo). ¿Qué haces?",
+      "opciones": [
+        "Considerar una transformación de y (log, Box-Cox) y volver a diagnosticar",
+        "Nada, si el R² es alto",
+        "Eliminar los puntos con residuales más grandes",
+        "Agregar más predictores hasta que desaparezca"
+      ],
+      "correcta": 0,
+      "explicacion": "El embudo indica varianza no constante (heterocedasticidad). Si σ ∝ μ, log y suele estabilizarla; Box-Cox ayuda a elegir. Después se reajusta y se revisan de nuevo los residuales."
+    },
+    {
+      "id": "s2-14",
+      "leccion": "05-supuestos-diagnostico",
+      "pregunta": "Un punto tiene apalancamiento hᵢᵢ alto pero residual pequeño. ¿Es influyente?",
+      "opciones": [
+        "Sí, todo punto con hᵢᵢ alto es influyente",
+        "Sí, si además el R² es bajo",
+        "No necesariamente: la influencia combina apalancamiento alto y residual grande (distancia de Cook)",
+        "No, porque los puntos con residual pequeño se pueden borrar"
+      ],
+      "correcta": 2,
+      "explicacion": "Un punto extremo en x que cae sobre la recta no cambia el ajuste. La distancia de Cook combina ambas cosas; un punto es influyente si al quitarlo los coeficientes cambian apreciablemente."
+    },
+    {
+      "id": "s2-15",
+      "leccion": "05-supuestos-diagnostico",
+      "pregunta": "¿Por qué se revisan los gráficos de residuales antes de interpretar valores p y R²?",
+      "opciones": [
+        "Porque los residuales son más fáciles de calcular",
+        "Porque los valores p, los IC y los IP solo son confiables si se cumplen los supuestos del error",
+        "Porque R² no se puede calcular sin residuales",
+        "Porque así lo exige la función lm() de R"
+      ],
+      "correcta": 1,
+      "explicacion": "Los supuestos viven en el error: si hay curvatura, heterocedasticidad o dependencia, los errores estándar y los valores p son incorrectos. El flujo es ajustar → residuales → corregir → interpretar."
+    }
+  ]
+}

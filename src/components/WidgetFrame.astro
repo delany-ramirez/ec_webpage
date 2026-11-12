@@ -1,0 +1,130 @@
+---
+/**
+ * Contenedor de un visualizador HTML aislado (public/widgets/*.html) en iframe.
+ * Barra con título, pantalla completa y abrir aparte. El src se asigna en cliente con el tema
+ * actual (?theme=) para evitar un parpadeo; después el tema se propaga por postMessage
+ * (scripts/theme.ts) y el widget reporta su alto con WIDGET_HEIGHT.
+ */
+import type { Widget } from "../lib/interactivos";
+
+interface Props {
+  widget: Widget;
+}
+const { widget } = Astro.props;
+const src = `/widgets/${widget.archivo}`;
+---
+
+<figure class="widget" data-widget>
+  <div class="w-barra">
+    <span class="w-punto" aria-hidden="true"></span>
+    <figcaption class="w-titulo">{widget.titulo}</figcaption>
+    <div class="w-acciones">
+      <button type="button" class="icon-btn" data-widget-full title="Pantalla completa" aria-label="Pantalla completa">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"/></svg>
+      </button>
+      <a class="icon-btn" href={src} target="_blank" rel="noopener" title="Abrir en una pestaña" aria-label="Abrir en una pestaña">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M19 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5"/></svg>
+      </a>
+    </div>
+  </div>
+  <iframe
+    class="widget-iframe"
+    data-src={src}
+    title={widget.titulo}
+    loading="lazy"
+    style={`height:${widget.alto}px`}
+    sandbox="allow-scripts allow-same-origin"
+  ></iframe>
+  {widget.descripcion && <p class="w-desc">{widget.descripcion}</p>}
+</figure>
+
+<script>
+  import { temaActual } from "../scripts/theme";
+
+  document.querySelectorAll<HTMLElement>("[data-widget]").forEach((fig) => {
+    const iframe = fig.querySelector<HTMLIFrameElement>("iframe")!;
+    const base = iframe.dataset.src!;
+    iframe.src = `${base}?theme=${temaActual()}`;
+
+    fig.querySelector("[data-widget-full]")?.addEventListener("click", () => {
+      if (document.fullscreenElement) document.exitFullscreen();
+      else fig.requestFullscreen?.();
+    });
+
+    window.addEventListener("message", (e) => {
+      if (e.source !== iframe.contentWindow) return;
+      const d = e.data || {};
+      if (d.type === "WIDGET_HEIGHT" && typeof d.height === "number" && !document.fullscreenElement) {
+        iframe.style.height = `${Math.max(200, Math.min(1200, Math.round(d.height) + 2))}px`;
+      }
+    });
+  });
+</script>
+
+<style>
+  .widget {
+    margin: 0;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    overflow: hidden;
+    background: var(--surface);
+  }
+  .widget:fullscreen {
+    border: 0;
+    border-radius: 0;
+    display: flex;
+    flex-direction: column;
+    background: var(--ink);
+  }
+  .widget:fullscreen iframe {
+    flex: 1;
+    height: auto !important;
+  }
+  .w-barra {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px 8px 14px;
+    border-bottom: 1px solid var(--line);
+    background: var(--surface-2);
+  }
+  .w-punto {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--ok);
+    box-shadow: 0 0 0 3px var(--ok-soft);
+  }
+  .w-titulo {
+    flex: 1;
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    color: var(--text);
+  }
+  .w-acciones {
+    display: flex;
+    gap: 6px;
+  }
+  .w-acciones .icon-btn {
+    width: 30px;
+    height: 30px;
+    border-radius: 6px;
+  }
+  .w-acciones .icon-btn svg {
+    width: 15px;
+    height: 15px;
+  }
+  iframe {
+    display: block;
+    width: 100%;
+    border: 0;
+    background: var(--ink);
+    transition: height 0.2s;
+  }
+  .w-desc {
+    font-size: 13.5px;
+    color: var(--muted);
+    padding: 10px 14px 12px;
+    border-top: 1px solid var(--line);
+  }
+</style>

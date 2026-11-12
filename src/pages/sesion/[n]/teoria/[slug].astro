@@ -1,0 +1,93 @@
+---
+import { getCollection, render } from "astro:content";
+import Curso from "../../../../layouts/Curso.astro";
+import Cabecera from "../../../../components/Cabecera.astro";
+import PrevNext from "../../../../components/PrevNext.astro";
+import BotonCompletar from "../../../../components/BotonCompletar.astro";
+import Complementos from "../../../../components/Complementos.astro";
+import { parseLeccion, prevNext, tituloTexto, tituloHtml, etiquetaSesion, claveProgreso, nn } from "../../../../lib/curso";
+
+export async function getStaticPaths() {
+  const entradas = await getCollection("teoria");
+  return entradas.flatMap((entry) => {
+    const leccion = parseLeccion(entry, "teoria");
+    if (!leccion) return [];
+    return [{ params: { n: String(leccion.modulo.numero), slug: leccion.slug }, props: { entry, leccion } }];
+  });
+}
+
+const { entry, leccion } = Astro.props;
+const { Content, headings } = await render(entry);
+const { prev, next } = await prevNext(leccion.id);
+const clave = claveProgreso(leccion);
+---
+
+<Curso title={tituloTexto(leccion.titulo)} activo={leccion.id} moduloActivo={leccion.modulo.numero} headings={headings} tipo="Lección">
+  <Cabecera
+    eyebrow={`${etiquetaSesion(leccion)} · Lección ${nn(leccion.orden)}`}
+    titulo={leccion.titulo}
+    numero={nn(leccion.orden)}
+    headings={headings}
+  >
+    <span class="chip gold">{leccion.modulo.corto}</span>
+    {leccion.tema && <span class="chip">{leccion.tema}</span>}
+    <span class="espacio"></span>
+    <BotonCompletar clave={clave} />
+  </Cabecera>
+
+  <article class="prose rise d1">
+    <Content />
+  </article>
+
+  <Complementos leccion={leccion} />
+
+  <section class="cierre rise d2" data-pagefind-ignore>
+    <div>
+      <span class="eyebrow">Fin de la lección</span>
+      <p>
+        {next ? (
+          <>Cuando la tengas clara, márcala y sigue con <a href={next.ruta} set:html={tituloHtml(next.titulo)} />.</>
+        ) : (
+          <>Última lección publicada. Márcala si ya la tienes clara.</>
+        )}
+      </p>
+    </div>
+    <BotonCompletar clave={clave} grande />
+  </section>
+
+  <PrevNext prev={prev} next={next} />
+</Curso>
+
+<style>
+  .espacio {
+    flex: 1;
+  }
+  .cierre {
+    max-width: 72ch;
+    margin-top: 48px;
+    padding: 22px 24px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  .cierre p {
+    margin-top: 8px;
+    color: var(--muted);
+    font-size: 15px;
+    max-width: 44ch;
+  }
+  .cierre p a {
+    color: var(--gold);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .cierre p a :global(code) {
+    font-family: var(--font-mono);
+    font-size: 0.9em;
+  }
+</style>

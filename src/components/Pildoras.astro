@@ -1,0 +1,54 @@
+---
+/** Píldoras de sección bajo la cabecera (se ocultan en ≥1280 px, donde está el TOC lateral). */
+import type { MarkdownHeading } from "astro";
+
+interface Props {
+  headings: MarkdownHeading[];
+}
+const { headings } = Astro.props;
+const secciones = headings.filter((h) => h.depth === 2);
+
+/** Quita el prefijo numérico "1. " para acortar la píldora */
+const corto = (t: string) => t.replace(/^\d+(\.\d+)*\.?\s*/, "");
+---
+
+{secciones.length > 1 && (
+  <nav class="pildoras" aria-label="Secciones">
+    {secciones.map((h) => (
+      <a href={`#${h.slug}`} class="pildora">{corto(h.text)}</a>
+    ))}
+  </nav>
+)}
+
+<style>
+  .pildoras {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 2px 0 12px;
+    margin-bottom: 8px;
+    scrollbar-width: none;
+  }
+  .pildoras::-webkit-scrollbar {
+    display: none;
+  }
+  .pildora {
+    flex-shrink: 0;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--muted);
+    border: 1px solid var(--line-strong);
+    border-radius: 100px;
+    padding: 6px 12px;
+    transition: color 0.2s, border-color 0.2s;
+  }
+  .pildora:hover {
+    color: var(--gold);
+    border-color: var(--gold);
+  }
+  @media (min-width: 1280px) {
+    .pildoras {
+      display: none;
+    }
+  }
+</style>

@@ -1,0 +1,3 @@
+[submodule "content"]
+	path = content
+	url = https://github.com/delany-ramirez/intro_estadistica_calidad

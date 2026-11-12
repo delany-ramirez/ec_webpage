@@ -1,0 +1,191 @@
+---
+/**
+ * Bloques complementarios de una lección (sin numeración, al final del cuerpo):
+ *   Explora   — visualizadores registrados para la lección (widgets.json)
+ *   Practica  — prácticas R Markdown y ejercicios que la agenda de la sesión asocia a esta teoría
+ *   Comprueba — preguntas de autoevaluación etiquetadas con esta lección
+ * Adaptado de la estructura Explora / Practica / Comprueba de leogaviria, con la paleta del sitio.
+ */
+import WidgetFrame from "./WidgetFrame.astro";
+import Quiz from "./Quiz.astro";
+import { type Leccion, ejerciciosDe, tituloHtml, claveProgreso } from "../lib/curso";
+import { widgetsDe, preguntasDeLeccion } from "../lib/interactivos";
+import { materialDeTeoria } from "../lib/notebooks-fs";
+import NotebooksCitados from "./NotebooksCitados.astro";
+
+interface Props {
+  leccion: Leccion;
+}
+const { leccion } = Astro.props;
+const clave = claveProgreso(leccion);
+const material = materialDeTeoria(leccion.modulo.numero, leccion.orden);
+
+const widgets = widgetsDe(clave);
+const preguntas = await preguntasDeLeccion(leccion.modulo.numero, leccion.slug);
+const ejercicios = (await ejerciciosDe(leccion.modulo.numero)).filter((e) => !e.taller && material.ejercicios.includes(e.orden));
+
+const hay = widgets.length > 0 || ejercicios.length > 0 || preguntas.length > 0 || material.practicas.length > 0;
+---
+
+{hay && (
+  <section class="complementos" aria-label="Complementos de la lección" data-pagefind-ignore>
+    {widgets.length > 0 && (
+      <div class="bloque explora" id="explora">
+        <div class="b-head">
+          <span class="b-tag">Explora</span>
+          <h2>Visualiza el concepto</h2>
+        </div>
+        <div class="b-widgets">
+          {widgets.map((w) => <WidgetFrame widget={w} />)}
+        </div>
+      </div>
+    )}
+
+    {(ejercicios.length > 0 || material.practicas.length > 0) && (
+      <div class="bloque practica">
+        <div class="b-head">
+          <span class="b-tag">Practica</span>
+          <h2>{material.practicas.length > 0 ? "Práctica en R y ejercicios" : "Ejercicios relacionados"}</h2>
+        </div>
+        {material.practicas.length > 0 && (
+          <div class="b-nbs-leccion">
+            <NotebooksCitados practicas={material.practicas} etiqueta="Práctica de esta lección" />
+          </div>
+        )}
+        <ul class="b-ejercicios">
+          {ejercicios.map((l) => (
+            <li>
+              <a href={l.ruta}>
+                <span class="n">{l.rotulo}</span>
+                <span class="t" set:html={tituloHtml(l.titulo)} />
+                <span class="m">{l.tema}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    )}
+
+    {preguntas.length > 0 && (
+      <div class="bloque comprueba">
+        <div class="b-head">
+          <span class="b-tag">Comprueba</span>
+          <h2>¿Lo tienes claro?</h2>
+        </div>
+        <Quiz clave={`autoevaluacion/${clave}`} preguntas={preguntas} titulo={`Autoevaluación · ${preguntas.length} pregunta${preguntas.length > 1 ? "s" : ""}`} />
+        <p class="b-nota">
+          La <a href={`/sesion/${leccion.modulo.numero}/autoevaluacion/`}>autoevaluación completa de la sesión</a> reúne las preguntas de todas sus lecciones.
+        </p>
+      </div>
+    )}
+  </section>
+)}
+
+<style>
+  .complementos {
+    max-width: 72ch;
+    margin-top: 56px;
+    padding-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 36px;
+  }
+  .bloque {
+    border-top: 1px dashed var(--line-strong);
+    padding-top: 28px;
+  }
+  .b-head {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 18px;
+  }
+  .b-head h2 {
+    font-size: 22px;
+  }
+  .b-tag {
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 6px;
+    border: 1px solid currentColor;
+  }
+  .explora .b-tag { color: var(--silver); }
+  .practica .b-tag { color: var(--bronze); }
+  .comprueba .b-tag { color: var(--gold); }
+
+  .b-widgets {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+  .b-ejercicios {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .b-ejercicios li {
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--surface);
+    transition: border-color 0.2s;
+  }
+  .b-ejercicios li:hover {
+    border-color: var(--bronze);
+  }
+  .b-ejercicios a {
+    display: grid;
+    grid-template-columns: 58px 1fr;
+    gap: 4px 14px;
+    padding: 12px 16px;
+  }
+  .b-nbs-leccion {
+    padding: 12px 16px;
+    margin-bottom: 12px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--surface);
+  }
+  .b-nbs {
+    padding: 10px 16px 12px 88px;
+    border-top: 1px dashed var(--line);
+  }
+  @media (max-width: 560px) {
+    .b-nbs {
+      padding-left: 16px;
+    }
+  }
+  .b-ejercicios .n {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--bronze);
+    grid-row: span 2;
+    padding-top: 2px;
+  }
+  .b-ejercicios .t {
+    font-size: 15px;
+    font-weight: 500;
+  }
+  .b-ejercicios .t :global(code) {
+    font-family: var(--font-mono);
+    font-size: 0.9em;
+  }
+  .b-ejercicios .m {
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    color: var(--muted-2);
+  }
+  .b-nota {
+    margin-top: 12px;
+    font-size: 13.5px;
+    color: var(--muted);
+  }
+  .b-nota a {
+    color: var(--gold);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+</style>

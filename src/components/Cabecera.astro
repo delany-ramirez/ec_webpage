@@ -1,0 +1,68 @@
+---
+/** Cabecera de página dentro del curso: eyebrow, título (con número opcional), chips y píldoras. */
+import type { MarkdownHeading } from "astro";
+import Pildoras from "./Pildoras.astro";
+import { tituloHtml } from "../lib/curso";
+
+interface Props {
+  eyebrow: string;
+  titulo: string;
+  numero?: string;
+  headings?: MarkdownHeading[];
+}
+const { eyebrow, titulo, numero, headings = [] } = Astro.props;
+---
+
+<header class="cabecera rise">
+  <span class="eyebrow">{eyebrow}</span>
+  <h1>
+    {numero && <span class="num">{numero}</span>}
+    <span data-pagefind-meta="title" set:html={tituloHtml(titulo)} />
+  </h1>
+  <div class="cab-meta" data-pagefind-ignore>
+    <slot />
+  </div>
+  <Pildoras headings={headings} />
+</header>
+
+<style>
+  .cabecera {
+    padding: 22px 0 22px;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 36px;
+  }
+  .cabecera h1 {
+    font-size: clamp(27px, 3.6vw, 38px);
+    margin: 14px 0 14px;
+    max-width: 26ch;
+  }
+  .cabecera h1 .num {
+    font-family: var(--font-mono);
+    font-weight: 400;
+    color: var(--gold);
+    font-size: 0.6em;
+    vertical-align: 0.35em;
+    margin-right: 0.35em;
+    letter-spacing: 0;
+  }
+  .cabecera h1 :global(code) {
+    font-family: var(--font-mono);
+    font-size: 0.8em;
+    color: var(--gold);
+    font-weight: 500;
+  }
+  .cab-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 14px;
+  }
+  .cab-meta:empty {
+    display: none;
+  }
+  .cab-meta :global(.tema) {
+    color: var(--muted);
+    font-size: 14px;
+  }
+</style>

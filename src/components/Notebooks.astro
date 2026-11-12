@@ -1,0 +1,135 @@
+---
+/**
+ * Tarjetas de las prácticas R Markdown de una sesión con botones Descargar / GitHub, y el
+ * paquete .zip de la sesión (prácticas + datos con su estructura de carpetas).
+ * Los datos salen del sistema de archivos del submodule (lib/notebooks-fs.ts); la descripción
+ * es la de la tabla «Prácticas» del README de la sesión.
+ */
+import { notebooksDe } from "../lib/notebooks-fs";
+import { moduloPorNumero, urlPaquete } from "../lib/rutas";
+import { tituloHtml, nn } from "../lib/curso";
+
+interface Props {
+  modulo: number;
+}
+const { modulo } = Astro.props;
+const lista = notebooksDe(modulo);
+const carpeta = moduloPorNumero(modulo)?.carpeta ?? "";
+---
+
+{lista.length > 0 && (
+  <section class="nbs rise d1" aria-labelledby="nbs-titulo">
+    <div class="nbs-head">
+      <span class="eyebrow" id="nbs-titulo">Prácticas en R</span>
+      <span class="nbs-nota">
+        Las prácticas leen los datos de <code>../datos/</code>: descarga el paquete de la sesión,
+        descomprímelo y abre cada <code>.Rmd</code> en RStudio para hacer <em>Knit</em>.
+      </span>
+    </div>
+    <a class="btn btn-primary btn-sm paquete" href={urlPaquete(carpeta)} download>
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M5 21h14" /></svg>
+      Descargar material de la sesión (.zip)
+    </a>
+    <ul class="nbs-lista">
+      {lista.map((nb) => (
+        <li class="nb">
+          <div class="nb-cab">
+            <span class="n">{nn(nb.orden)}</span>
+            <h3 set:html={tituloHtml(nb.titulo)} />
+            <span class="chip tipo">R Markdown</span>
+          </div>
+          {nb.descripcion && <p set:html={tituloHtml(nb.descripcion)} />}
+          <div class="nb-acciones">
+            <a class="btn btn-ghost btn-sm" href={nb.descarga} download={nb.archivo}>Descargar .Rmd</a>
+            <a class="btn btn-ghost btn-sm" href={nb.github} target="_blank" rel="noopener">Ver en GitHub</a>
+          </div>
+        </li>
+      ))}
+    </ul>
+  </section>
+)}
+
+<style>
+  .nbs {
+    max-width: 72ch;
+    margin-bottom: 40px;
+  }
+  .nbs-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 6px 14px;
+    margin-bottom: 12px;
+  }
+  .nbs-nota {
+    font-size: 13.5px;
+    color: var(--muted);
+  }
+  .nbs-nota code {
+    font-family: var(--font-mono);
+    font-size: 0.9em;
+  }
+  .paquete {
+    gap: 6px;
+    margin-bottom: 14px;
+  }
+  .nbs-lista {
+    list-style: none;
+    display: grid;
+    gap: 10px;
+  }
+  .nb {
+    padding: 16px 18px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+  }
+  .nb-cab {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 6px 10px;
+  }
+  .nb-cab .n {
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    color: var(--gold);
+  }
+  .nb-cab h3 {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0;
+  }
+  .nb-cab h3 :global(code) {
+    font-family: var(--font-mono);
+    font-size: 0.9em;
+    color: var(--gold);
+  }
+  .nb-cab .tipo {
+    font-size: 11px;
+    margin-left: auto;
+  }
+  .nb p {
+    margin-top: 6px;
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.55;
+  }
+  .nb p :global(code) {
+    font-family: var(--font-mono);
+    font-size: 0.9em;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 0 0.3em;
+  }
+  .nb-acciones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+  }
+  .nb-acciones .btn {
+    gap: 6px;
+  }
+</style>

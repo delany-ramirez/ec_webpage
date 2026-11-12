@@ -1,0 +1,604 @@
+/* =========================================================================
+   ec.delanyr.dev — sistema de diseño del curso
+   Hereda los tokens y componentes base de delanyr.dev (dr_webpage/global.css)
+   y añade: tema claro, tokens semánticos del curso y estilos de lección.
+   ========================================================================= */
+
+:root {
+  /* --- paleta del portafolio (tema oscuro, por defecto) --- */
+  --ink: #0d1219;
+  --surface: #151c27;
+  --surface-2: #1b2431;
+  --line: rgba(232, 236, 242, 0.09);
+  --line-strong: rgba(232, 236, 242, 0.16);
+  --text: #e9edf3;
+  --muted: #8b96a8;
+  --muted-2: #76818f; /* el portafolio usa #647084; aquí sube a AA (4.8:1) por el texto mono pequeño */
+  --gold: #e3b058;
+  --gold-soft: rgba(227, 176, 88, 0.14);
+  --silver: #b9c2cf;
+  --bronze: #c08457;
+  --maxw: 1120px;
+
+  /* --- tokens del curso --- */
+  --ok: #5fd08a;
+  --ok-soft: rgba(95, 208, 138, 0.14);
+  --warn: #e3b058;
+  --err: #e0705f;
+  --err-soft: rgba(224, 112, 95, 0.14);
+  --code-bg: #0a0e14;
+  --nav-bg: rgba(13, 18, 25, 0.72);
+  --shadow: 0 24px 60px -30px rgba(0, 0, 0, 0.7);
+
+  /* --- tipografía --- */
+  --font-display: "Space Grotesk", sans-serif;
+  --font-body: "IBM Plex Sans", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", monospace;
+
+  color-scheme: dark;
+}
+
+:root[data-theme="light"] {
+  --ink: #f7f5f0;
+  --surface: #ffffff;
+  --surface-2: #efece5;
+  --line: rgba(13, 18, 25, 0.1);
+  --line-strong: rgba(13, 18, 25, 0.18);
+  --text: #141a22;
+  --muted: #4f5a67;
+  --muted-2: #66707e;
+  --gold: #8a6318; /* AA (4.6+) como texto pequeño sobre papel y superficies */
+  --gold-soft: rgba(184, 134, 47, 0.1);
+  --silver: #5f6a78;
+  --bronze: #8c5f33;
+
+  --ok: #27874d;
+  --ok-soft: rgba(47, 158, 91, 0.12);
+  --warn: #b8862f;
+  --err: #c2483a;
+  --err-soft: rgba(194, 72, 58, 0.12);
+  --code-bg: #f3f1ea;
+  --nav-bg: rgba(247, 245, 240, 0.78);
+  --shadow: 0 24px 60px -30px rgba(13, 18, 25, 0.25);
+
+  color-scheme: light;
+}
+
+/* ---------- reset ---------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+body {
+  background: var(--ink);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  min-height: 100dvh;
+}
+
+/* grid de fondo con máscara radial (firma del portafolio) */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(var(--line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size: 64px 64px;
+  -webkit-mask-image: radial-gradient(ellipse 90% 60% at 50% 0%, #000 0%, transparent 70%);
+  mask-image: radial-gradient(ellipse 90% 60% at 50% 0%, #000 0%, transparent 70%);
+  opacity: 0.5;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.wrap {
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding: 0 28px;
+  position: relative;
+  z-index: 1;
+}
+@media (max-width: 600px) {
+  .wrap {
+    padding: 0 18px;
+  }
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+img {
+  max-width: 100%;
+  height: auto;
+}
+[hidden] {
+  display: none !important;
+}
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.mono {
+  font-family: var(--font-mono);
+}
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold);
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+.eyebrow::before {
+  content: "";
+  width: 22px;
+  height: 1px;
+  background: var(--gold);
+  display: inline-block;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+}
+
+/* ---------- chips / botones (heredados) ---------- */
+.chip {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--muted);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 100px;
+  padding: 4px 11px;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.chip.gold {
+  color: var(--gold);
+  border-color: var(--gold);
+  background: var(--gold-soft);
+}
+.chip.ok {
+  color: var(--ok);
+  border-color: var(--ok);
+  background: var(--ok-soft);
+}
+
+.btn {
+  font-family: var(--font-mono);
+  font-size: 13.5px;
+  padding: 12px 20px;
+  border-radius: 8px;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s,
+    background 0.2s,
+    border-color 0.2s,
+    color 0.2s;
+  display: inline-flex;
+  gap: 9px;
+  align-items: center;
+  line-height: 1.2;
+}
+.btn-primary {
+  background: var(--gold);
+  color: var(--ink);
+  font-weight: 500;
+}
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px -10px rgba(227, 176, 88, 0.55);
+}
+.btn-ghost {
+  border: 1px solid var(--line-strong);
+  color: var(--text);
+}
+.btn-ghost:hover {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+.btn-sm {
+  padding: 8px 14px;
+  font-size: 12.5px;
+}
+
+/* ---------- nav ---------- */
+header.nav {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  background: var(--nav-bg);
+  border-bottom: 1px solid var(--line);
+}
+.nav-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 62px;
+  gap: 16px;
+}
+.brand {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 15px;
+  letter-spacing: -0.01em;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+}
+.brand .mk {
+  width: 9px;
+  height: 9px;
+  background: var(--gold);
+  border-radius: 50%;
+  box-shadow: 0 0 0 4px var(--gold-soft);
+  flex-shrink: 0;
+}
+.brand .sep {
+  color: var(--muted-2);
+  font-weight: 400;
+}
+.brand .curso {
+  color: var(--muted);
+  font-weight: 500;
+}
+.nav-links {
+  display: flex;
+  gap: 22px;
+  align-items: center;
+}
+.nav-links a {
+  font-size: 13.5px;
+  color: var(--muted);
+  transition: color 0.2s;
+}
+.nav-links a:hover {
+  color: var(--text);
+}
+@media (max-width: 760px) {
+  .brand .sep,
+  .brand .curso {
+    display: none;
+  }
+  .nav-links a:not(.keep) {
+    display: none;
+  }
+}
+
+.icon-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: 1px solid var(--line-strong);
+  color: var(--muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    color 0.2s,
+    border-color 0.2s,
+    background 0.2s;
+}
+.icon-btn:hover {
+  color: var(--gold);
+  border-color: var(--gold);
+}
+.icon-btn svg {
+  width: 17px;
+  height: 17px;
+}
+
+/* ---------- pie ---------- */
+footer.foot {
+  border-top: 1px solid var(--line);
+  padding: 28px 0;
+  margin-top: 64px;
+}
+.foot-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  color: var(--muted-2);
+}
+.foot-inner a {
+  color: var(--muted);
+  transition: color 0.2s;
+}
+.foot-inner a:hover {
+  color: var(--gold);
+}
+
+/* ---------- cabecera de lección ---------- */
+.leccion-head {
+  padding: 40px 0 28px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 36px;
+}
+.leccion-head h1 {
+  font-size: clamp(28px, 4.2vw, 42px);
+  margin: 14px 0 14px;
+  max-width: 24ch;
+}
+.leccion-head h1 code {
+  font-family: var(--font-mono);
+  font-size: 0.8em;
+  color: var(--gold);
+  font-weight: 500;
+}
+.leccion-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+.leccion-meta .tema {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+/* ---------- prosa (cuerpo Markdown renderizado) ---------- */
+.prose {
+  font-size: 16.5px;
+  line-height: 1.7;
+  max-width: 72ch;
+  color: var(--text);
+  /* identificadores largos en `code` inline pueden partirse; lo que no cabe (MathML oculto de
+     KaTeX, fórmulas inline muy anchas) se recorta sin provocar scroll horizontal de la página */
+  overflow-wrap: anywhere;
+  overflow-x: clip;
+}
+.prose > * + * {
+  margin-top: 1.1em;
+}
+.prose h2,
+.prose h3,
+.prose h4 {
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  scroll-margin-top: 84px;
+}
+.prose h2 {
+  font-size: 26px;
+  margin-top: 2.2em;
+  padding-top: 1.1em;
+  border-top: 1px solid var(--line);
+}
+.prose h2:first-child {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+}
+.prose h3 {
+  font-size: 20px;
+  margin-top: 1.8em;
+}
+.prose h4 {
+  font-size: 17px;
+  font-weight: 600;
+  margin-top: 1.5em;
+}
+.prose p {
+  color: var(--text);
+}
+.prose strong {
+  font-weight: 600;
+}
+.prose a {
+  color: var(--gold);
+  text-decoration: underline;
+  text-decoration-color: var(--gold-soft);
+  text-underline-offset: 3px;
+}
+.prose a:hover {
+  text-decoration-color: var(--gold);
+}
+.prose ul,
+.prose ol {
+  padding-left: 1.4em;
+}
+.prose li + li {
+  margin-top: 0.35em;
+}
+.prose li::marker {
+  color: var(--gold);
+  font-family: var(--font-mono);
+}
+.prose blockquote {
+  border-left: 3px solid var(--gold);
+  background: var(--gold-soft);
+  border-radius: 0 10px 10px 0;
+  padding: 14px 20px;
+  color: var(--text);
+  font-size: 15.5px;
+}
+.prose blockquote > * + * {
+  margin-top: 0.7em;
+}
+.prose hr {
+  border: 0;
+  border-top: 1px solid var(--line);
+  margin: 2.4em 0;
+}
+.prose code {
+  font-family: var(--font-mono);
+  font-size: 0.88em;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  padding: 0.1em 0.4em;
+}
+/* Referencias cruzadas generadas por remark-enlaces-cruzados (`01-x.md` → lección) */
+.prose a code {
+  color: var(--gold);
+  border-color: var(--gold-soft);
+  transition: border-color 0.2s, background 0.2s;
+}
+.prose a:hover code {
+  border-color: var(--gold);
+  background: var(--gold-soft);
+}
+.prose a.ref-externa code::after {
+  content: " ↗";
+  font-size: 0.8em;
+  color: var(--muted-2);
+}
+.prose pre {
+  background: var(--code-bg) !important;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 16px 18px;
+  overflow-x: auto;
+  font-size: 13.5px;
+  line-height: 1.6;
+}
+.prose pre code {
+  background: none;
+  border: 0;
+  padding: 0;
+  font-size: inherit;
+}
+
+/* Shiki con dos temas: el sitio elige por [data-theme] */
+.astro-code,
+.astro-code span {
+  color: var(--shiki-dark);
+  background-color: transparent;
+}
+:root[data-theme="light"] .astro-code,
+:root[data-theme="light"] .astro-code span {
+  color: var(--shiki-light);
+}
+
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14.5px;
+  display: block;
+  overflow-x: auto;
+}
+.prose thead th {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted-2);
+  text-align: left;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--line-strong);
+}
+.prose tbody td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--line);
+  vertical-align: top;
+}
+.prose tbody tr:hover td {
+  background: var(--surface);
+}
+
+/* KaTeX */
+.prose .katex {
+  font-size: 1.05em;
+  color: inherit;
+}
+.prose .katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 6px 0;
+  margin: 1.2em 0;
+}
+
+/* ---------- accesibilidad ---------- */
+.skip {
+  position: absolute;
+  left: 16px;
+  top: -60px;
+  z-index: 200;
+  background: var(--gold);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  transition: top 0.15s;
+}
+.skip:focus {
+  top: 12px;
+}
+
+/* ---------- utilidades ---------- */
+.rise {
+  opacity: 0;
+  transform: translateY(16px);
+  animation: rise 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
+}
+.d1 { animation-delay: 0.05s; }
+.d2 { animation-delay: 0.14s; }
+.d3 { animation-delay: 0.23s; }
+@keyframes rise {
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.note {
+  font-size: 12.5px;
+  color: var(--muted-2);
+  font-family: var(--font-mono);
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}

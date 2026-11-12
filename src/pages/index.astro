@@ -1,0 +1,517 @@
+---
+import Base from "../layouts/Base.astro";
+import IndiceCurso from "../components/IndiceCurso.astro";
+import { MODULOS, leccionesPorModulo, ejerciciosPorModulo } from "../lib/curso";
+import { modulosConAutoevaluacion } from "../lib/interactivos";
+import { notebooksDe } from "../lib/notebooks-fs";
+
+const porModulo = await leccionesPorModulo();
+const ejercicios = await ejerciciosPorModulo();
+const conAuto = await modulosConAutoevaluacion();
+const totalLecciones = [...porModulo.values()].reduce((n, ls) => n + ls.length, 0);
+
+/** Espejo de la tabla «Programa» y de los RAA del README del contenido. */
+const CRONOGRAMA = [
+  { momento: "Antes de S1", tema: "Diagnóstico de entrada (sin nota) + Pre-trabajo 1", ruta: "/pre-trabajos/1/", peso: "15 %" },
+  { momento: "Sesión 1", tema: "Variabilidad, normalidad e inferencia · Taller integrador 1", ruta: "/sesion/1/", peso: "20 %" },
+  { momento: "Entre sesiones", tema: "Pre-trabajo 2", ruta: "/pre-trabajos/2/", peso: "15 %" },
+  { momento: "Sesión 2", tema: "Inferencia aplicada, regresión y supuestos · Evaluación individual", ruta: "/sesion/2/", peso: "50 %" },
+];
+const RAA = [
+  { id: "RAA1", texto: "Organizar y visualizar datos de procesos de calidad, seleccionando medidas y gráficos descriptivos para comparar grupos y detectar valores atípicos." },
+  { id: "RAA2", texto: "Modelar la variabilidad de una característica de calidad con distribuciones de probabilidad y verificar el supuesto de normalidad." },
+  { id: "RAA3", texto: "Estimar parámetros y contrastar hipótesis sobre medias y varianzas, interpretando valor p, errores tipo I y II y potencia." },
+  { id: "RAA4", texto: "Ajustar e interpretar modelos de regresión lineal y evaluar sus supuestos mediante análisis de residuales, con software estadístico." },
+];
+---
+
+<Base>
+  <IndiceCurso />
+  <main class="wrap" id="contenido">
+    <section class="hero">
+      <div class="hero-txt">
+        <span class="status rise">
+          <span class="pulse"></span>
+          AS001 · Maestría en Sistemas Integrados de Gestión de la Calidad · UTP
+        </span>
+        <h1 class="rise d1">Análisis <span class="g">Estadístico</span><br /><span class="flow">la variabilidad de un proceso, con datos y con R</span></h1>
+        <p class="lede rise d2">
+          Un nivelatorio de dos sábados para describir, modelar e inferir sobre características
+          de calidad: de la estratificación y la normalidad a las pruebas de hipótesis y la
+          regresión, con prácticas en R Markdown sobre datos de procesos. Prepara el camino a
+          Diseño y Desarrollo de Experimentos (ASC22).
+        </p>
+        <div class="hero-actions rise d3">
+          <a href="/pre-trabajos/instalacion/" class="btn btn-primary">Empieza aquí: instala R</a>
+          <a href="/pre-trabajos/" class="btn btn-ghost">Ver los pre-trabajos</a>
+        </div>
+      </div>
+      <div class="card-profile rise d2" aria-label="Ficha del curso">
+        <span class="hd">// ficha del curso</span>
+        <div class="row"><span class="k">intensidad</span><span class="v">12 h · 2 sábados de 6 h</span></div>
+        <div class="row"><span class="k">modalidad</span><span class="v">aprendizaje invertido</span></div>
+        <div class="row"><span class="k">sesiones</span><span class="v">{MODULOS.length}</span></div>
+        <div class="row"><span class="k">lecciones</span><span class="v g">{totalLecciones} publicadas</span></div>
+        <div class="row"><span class="k">tu progreso</span><span class="v"><a href="/progreso/" data-progreso-texto>0 / 0 · 0%</a></span></div>
+        <div class="row"><span class="k">software</span><span class="v">R ≥ 4.2 · RStudio</span></div>
+        <div class="row"><span class="k">stack</span><span class="v">tidyverse · R Markdown</span></div>
+        <div class="row"><span class="k">evaluación</span><span class="v">pre-trabajos · taller · evaluación individual</span></div>
+        <div class="row"><span class="k">docente</span><span class="v">Délany Ramírez del Río</span></div>
+      </div>
+    </section>
+
+    <section class="block">
+      <div class="head">
+        <span class="eyebrow">Sesiones</span>
+        <h2>Dos sábados, una sola ruta</h2>
+        <p>Antes de cada sábado preparas los conceptos con un pre-trabajo; las 6 horas presenciales se dedican a resolver dudas y a trabajar con datos en R.</p>
+      </div>
+      <div class="mods">
+        <a href="/pre-trabajos/" class="mod">
+          <div class="mod-top">
+            <span class="idx">P</span>
+            <span class="ses">antes de cada sesión · 30 %</span>
+          </div>
+          <h3>Pre-trabajos: instalación, diagnóstico y repaso</h3>
+          <div class="mod-foot">
+            <span class="chip gold">2 pre-trabajos</span>
+            <span class="chip">Diagnóstico sin nota</span>
+          </div>
+        </a>
+        {MODULOS.map((m) => {
+          const ls = porModulo.get(m.numero) ?? [];
+          const ejs = (ejercicios.get(m.numero) ?? []).filter((e) => !e.taller);
+          const nbs = notebooksDe(m.numero).length;
+          const vacio = ls.length === 0;
+          return (
+            <a href={`/sesion/${m.numero}/`} class:list={["mod", { vacio }]}>
+              <div class="mod-top">
+                <span class="idx">S{m.numero}</span>
+                <span class="ses">{m.raa.join(" · ")} · {m.horas} h{!vacio && <> · <span class="pct" data-porcentaje-modulo={m.numero}>0%</span></>}</span>
+              </div>
+              <h3>{m.nombre}</h3>
+              <div class="mod-foot">
+                {vacio ? (
+                  <span class="chip">En construcción</span>
+                ) : (
+                  <>
+                    <span class="chip gold">{ls.length} lecciones</span>
+                    {nbs > 0 && <span class="chip">{nbs} prácticas en R</span>}
+                    {ejs.length > 0 && <span class="chip">{ejs.length} ejercicios</span>}
+                    {conAuto.has(m.numero) && <span class="chip">Autoevaluación</span>}
+                  </>
+                )}
+              </div>
+              <div class="barra" aria-hidden="true"><span class="fill" data-progreso-modulo={m.numero}></span></div>
+            </a>
+          );
+        })}
+      </div>
+    </section>
+
+    <section class="block" id="programa">
+      <div class="head">
+        <span class="eyebrow">Programa</span>
+        <h2>Qué se hace y cuánto pesa</h2>
+        <p>El cuestionario y el ejercicio en R de cada pre-trabajo se califican; el diagnóstico, las lecturas y la instalación son formativos.</p>
+      </div>
+      <div class="programa">
+        <ol class="crono">
+          {CRONOGRAMA.map((c) => (
+            <li>
+              <a href={c.ruta}>
+                <span class="c-momento">{c.momento}</span>
+                <span class="c-tema">{c.tema}</span>
+                <span class="c-peso">{c.peso}</span>
+              </a>
+            </li>
+          ))}
+        </ol>
+        <div class="raa">
+          <span class="raa-hd">// resultados de aprendizaje</span>
+          <dl>
+            {RAA.map((r) => (
+              <div>
+                <dt>{r.id}</dt>
+                <dd>{r.texto}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+      </div>
+    </section>
+
+    <section class="block">
+      <div class="head">
+        <span class="eyebrow">Cómo trabajar el curso</span>
+        <h2>Tres pasos para empezar</h2>
+      </div>
+      <div class="pasos">
+        <a href="/pre-trabajos/instalacion/" class="paso">
+          <span class="n">01</span>
+          <h3>Instala R y RStudio</h3>
+          <p>R ≥ 4.2, RStudio y los paquetes del curso con <code>source("install.R")</code>. 20–30 min, antes del diagnóstico de entrada.</p>
+        </a>
+        <a href="/pre-trabajos/" class="paso">
+          <span class="n">02</span>
+          <h3>Haz el diagnóstico y el pre-trabajo 1</h3>
+          <p>Cierran el miércoles anterior a la Sesión 1. Con tus respuestas, la sesión empieza por los errores frecuentes del grupo.</p>
+        </a>
+        <a href="/sesion/1/" class="paso">
+          <span class="n">03</span>
+          <h3>Llega a la Sesión 1</h3>
+          <p>Cada lección tiene teoría con LaTeX, su práctica en R Markdown, ejercicios y preguntas de autoevaluación. Marca tu avance a medida que avanzas.</p>
+        </a>
+      </div>
+    </section>
+  </main>
+</Base>
+
+<style>
+  .hero {
+    padding: 84px 0 72px;
+    display: grid;
+    grid-template-columns: 1.35fr 0.9fr;
+    gap: 56px;
+    align-items: center;
+  }
+  .status {
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    color: var(--muted);
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    margin-bottom: 26px;
+    border: 1px solid var(--line-strong);
+    border-radius: 100px;
+    padding: 6px 14px;
+  }
+  .status .pulse {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--ok);
+    position: relative;
+  }
+  .status .pulse::after {
+    content: "";
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    background: var(--ok);
+    opacity: 0.35;
+    animation: pulse 2.4s ease-out infinite;
+  }
+  @keyframes pulse {
+    0% { transform: scale(0.6); opacity: 0.5; }
+    100% { transform: scale(2.2); opacity: 0; }
+  }
+  .hero h1 {
+    font-size: clamp(38px, 5.6vw, 62px);
+    margin-bottom: 22px;
+  }
+  .hero h1 .g {
+    color: var(--gold);
+  }
+  .hero h1 .flow {
+    color: var(--muted-2);
+    font-weight: 400;
+    font-size: 0.6em;
+  }
+  .hero .lede {
+    font-size: 17.5px;
+    color: var(--muted);
+    max-width: 44ch;
+    margin-bottom: 34px;
+  }
+  .hero-actions {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  .card-profile {
+    background: linear-gradient(160deg, var(--surface), var(--surface-2));
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 24px;
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    color: var(--muted);
+    box-shadow: var(--shadow);
+  }
+  .card-profile .hd {
+    color: var(--muted-2);
+    margin-bottom: 8px;
+    display: block;
+  }
+  .card-profile .row {
+    display: flex;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .card-profile .row:last-child {
+    border-bottom: 0;
+  }
+  .card-profile .k {
+    color: var(--muted-2);
+    white-space: nowrap;
+  }
+  .card-profile .v {
+    color: var(--text);
+    text-align: right;
+  }
+  .card-profile .v.g {
+    color: var(--gold);
+  }
+  @media (max-width: 860px) {
+    .hero {
+      grid-template-columns: 1fr;
+      gap: 36px;
+      padding: 56px 0 48px;
+    }
+  }
+
+  section.block {
+    padding: 64px 0;
+    border-top: 1px solid var(--line);
+  }
+  .head {
+    margin-bottom: 36px;
+    max-width: 620px;
+  }
+  .head h2 {
+    font-size: clamp(26px, 3.6vw, 36px);
+    margin: 14px 0 10px;
+  }
+  .head p {
+    color: var(--muted);
+    font-size: 15.5px;
+  }
+
+  .mods {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+  .mod {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 22px 22px 18px;
+    transition: border-color 0.25s, transform 0.25s;
+    position: relative;
+  }
+  .mod:hover {
+    border-color: var(--gold);
+    transform: translateY(-3px);
+  }
+  .mod.vacio h3 {
+    color: var(--muted);
+  }
+  .mod.vacio .idx {
+    color: var(--muted);
+    border-color: var(--line-strong);
+  }
+  .mod-top {
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--font-mono);
+    font-size: 12px;
+  }
+  .mod .idx {
+    color: var(--gold);
+    border: 1px solid var(--gold);
+    border-radius: 5px;
+    padding: 2px 7px;
+  }
+  .mod .ses {
+    color: var(--muted-2);
+  }
+  .mod .pct {
+    color: var(--gold);
+  }
+  .card-profile .v a {
+    color: var(--text);
+    border-bottom: 1px dotted var(--muted-2);
+  }
+  .card-profile .v a:hover {
+    color: var(--gold);
+  }
+  .mod h3 {
+    font-size: 18px;
+    flex: 1;
+  }
+  .mod-foot {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .barra {
+    height: 3px;
+    border-radius: 3px;
+    background: var(--line);
+    overflow: hidden;
+    margin-top: 4px;
+  }
+  .barra .fill {
+    display: block;
+    height: 100%;
+    width: 0;
+    background: var(--gold);
+    transition: width 0.4s;
+  }
+  @media (max-width: 900px) {
+    .mods {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  @media (max-width: 560px) {
+    .mods {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .programa {
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    gap: 24px;
+    align-items: start;
+  }
+  .crono {
+    list-style: none;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    overflow: hidden;
+    background: var(--surface);
+  }
+  .crono li + li {
+    border-top: 1px solid var(--line);
+  }
+  .crono a {
+    display: grid;
+    grid-template-columns: 112px 1fr auto;
+    gap: 14px;
+    align-items: baseline;
+    padding: 16px 20px;
+    transition: background 0.2s;
+  }
+  .crono a:hover {
+    background: var(--surface-2);
+  }
+  .c-momento {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--gold);
+  }
+  .c-tema {
+    font-size: 15px;
+  }
+  .c-peso {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--text);
+    border: 1px solid var(--line-strong);
+    border-radius: 6px;
+    padding: 2px 8px;
+  }
+  .raa {
+    background: linear-gradient(160deg, var(--surface), var(--surface-2));
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 20px 22px;
+  }
+  .raa-hd {
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    color: var(--muted-2);
+  }
+  .raa dl > div {
+    display: grid;
+    grid-template-columns: 52px 1fr;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .raa dl > div:last-child {
+    border-bottom: 0;
+  }
+  .raa dt {
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    color: var(--gold);
+  }
+  .raa dd {
+    font-size: 14px;
+    color: var(--muted);
+  }
+  @media (max-width: 860px) {
+    .programa {
+      grid-template-columns: 1fr;
+    }
+  }
+  @media (max-width: 520px) {
+    .crono a {
+      grid-template-columns: 1fr auto;
+    }
+    .c-momento {
+      grid-column: 1 / -1;
+    }
+  }
+
+  .pasos {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    overflow: hidden;
+    background: var(--surface);
+  }
+  .paso {
+    padding: 28px 26px;
+    border-right: 1px solid var(--line);
+    transition: background 0.2s;
+  }
+  .paso:last-child {
+    border-right: 0;
+  }
+  .paso:hover {
+    background: var(--surface-2);
+  }
+  .paso .n {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--gold);
+    letter-spacing: 0.12em;
+  }
+  .paso h3 {
+    font-size: 19px;
+    margin: 10px 0 10px;
+  }
+  .paso p {
+    font-size: 14.5px;
+    color: var(--muted);
+  }
+  .paso code {
+    font-family: var(--font-mono);
+    font-size: 0.9em;
+    color: var(--gold);
+  }
+  @media (max-width: 760px) {
+    .pasos {
+      grid-template-columns: 1fr;
+    }
+    .paso {
+      border-right: 0;
+      border-bottom: 1px solid var(--line);
+    }
+    .paso:last-child {
+      border-bottom: 0;
+    }
+  }
+</style>

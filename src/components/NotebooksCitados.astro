@@ -1,0 +1,88 @@
+---
+/**
+ * Fila compacta de prácticas R Markdown con botones Descargar / GitHub. Se usa en la página
+ * del ejercicio y en el bloque Practica de la lección, con las prácticas que la agenda de la
+ * sesión asocia a esa teoría o ejercicio (ver materialDeTeoria en lib/notebooks-fs.ts).
+ */
+import type { PracticaCitada } from "../lib/notebooks-fs";
+import { tituloHtml, nn } from "../lib/curso";
+
+interface Props {
+  practicas: PracticaCitada[];
+  etiqueta?: string;
+}
+const { practicas, etiqueta = "Prácticas de apoyo" } = Astro.props;
+---
+
+{practicas.length > 0 && (
+  <div class="nbc" data-pagefind-ignore>
+    <span class="nbc-et">{etiqueta}</span>
+    <ul>
+      {practicas.map(({ notebook: nb, secciones }) => (
+        <li>
+          <span class="nbc-n">P{nn(nb.orden)}</span>
+          <span class="nbc-t"><span set:html={tituloHtml(nb.titulo)} />{secciones && <span class="nbc-sec"> · {secciones}</span>}</span>
+          <a class="btn btn-primary btn-xs" href={nb.descarga} download={nb.archivo}>.Rmd ↓</a>
+          <a class="btn btn-ghost btn-xs" href={nb.github} target="_blank" rel="noopener">GitHub</a>
+        </li>
+      ))}
+    </ul>
+    <span class="nbc-pie">Para hacer Knit necesitas también la carpeta <code>datos/</code>: usa el paquete .zip de la sesión.</span>
+  </div>
+)}
+
+<style>
+  .nbc {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .nbc-et {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted-2);
+  }
+  .nbc ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .nbc li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 10px;
+    font-size: 14px;
+  }
+  .nbc-n {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--gold);
+  }
+  .nbc-t {
+    flex: 1 1 200px;
+  }
+  .nbc-t :global(code) {
+    font-family: var(--font-mono);
+    font-size: 0.9em;
+  }
+  .nbc-sec {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--muted-2);
+  }
+  .nbc-pie {
+    font-size: 12px;
+    color: var(--muted-2);
+  }
+  .nbc-pie code {
+    font-family: var(--font-mono);
+  }
+  .btn-xs {
+    padding: 5px 10px;
+    font-size: 11.5px;
+  }
+</style>

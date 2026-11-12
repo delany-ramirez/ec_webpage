@@ -1,0 +1,6 @@
+# Configuración de Pagefind (se ejecuta en `postbuild`).
+site: dist
+# El MathML oculto de KaTeX duplica cada fórmula con su fuente LaTeX; se indexa solo la
+# versión visible (.katex-html).
+exclude_selectors:
+  - ".katex-mathml"

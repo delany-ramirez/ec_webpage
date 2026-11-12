@@ -1,0 +1,50 @@
+---
+import { getCollection } from "astro:content";
+import Curso from "../../../layouts/Curso.astro";
+import Cabecera from "../../../components/Cabecera.astro";
+import Quiz from "../../../components/Quiz.astro";
+import { moduloPorNumero } from "../../../lib/curso";
+
+export async function getStaticPaths() {
+  const entradas = await getCollection("autoevaluacion");
+  return entradas.flatMap((entry) => {
+    const modulo = moduloPorNumero(entry.data.modulo);
+    if (!modulo) return [];
+    return [{ params: { n: String(modulo.numero) }, props: { modulo, preguntas: entry.data.preguntas } }];
+  });
+}
+
+const { modulo, preguntas } = Astro.props;
+---
+
+<Curso title={`Autoevaluación · Sesión ${modulo.numero}`} moduloActivo={modulo.numero} tipo="Autoevaluación">
+  <Cabecera eyebrow={`Sesión ${modulo.numero} · Autoevaluación`} titulo={modulo.nombre}>
+    <span class="chip gold">{modulo.corto}</span>
+    <span class="chip">{preguntas.length} preguntas</span>
+    <span class="chip">Opción múltiple</span>
+  </Cabecera>
+
+  <p class="intro rise">
+    Preguntas conceptuales con corrección inmediata para comprobar lo que entendiste de la sesión.
+    Es formativa y sin nota: se guarda tu mejor puntaje en <a href="/progreso/">tu progreso</a>.
+    No reemplaza los <a href="/pre-trabajos/">pre-trabajos</a> ni el taller, que se entregan en la plataforma.
+  </p>
+
+  <div class="rise d1">
+    <Quiz clave={`autoevaluacion/${modulo.numero}`} preguntas={preguntas} titulo={`Sesión ${modulo.numero} · ${preguntas.length} preguntas`} />
+  </div>
+</Curso>
+
+<style>
+  .intro {
+    max-width: 72ch;
+    color: var(--muted);
+    font-size: 15px;
+    margin-bottom: 24px;
+  }
+  .intro a {
+    color: var(--gold);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+</style>

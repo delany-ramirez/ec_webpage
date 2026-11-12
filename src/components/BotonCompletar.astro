@@ -1,0 +1,50 @@
+---
+/** Botón que alterna una lección en el progreso. Estado y texto los pinta progress-ui.ts. */
+interface Props {
+  clave: string;
+  grande?: boolean;
+}
+const { clave, grande = false } = Astro.props;
+---
+
+<button type="button" class:list={["completar", { grande }]} data-completar={clave} aria-pressed="false">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>
+  <span data-completar-texto>Marcar como completada</span>
+</button>
+
+<style>
+  .completar {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--line-strong);
+    color: var(--muted);
+    background: transparent;
+    transition: color 0.2s, border-color 0.2s, background 0.2s;
+  }
+  .completar svg {
+    width: 15px;
+    height: 15px;
+    opacity: 0.55;
+  }
+  .completar:hover {
+    color: var(--gold);
+    border-color: var(--gold);
+  }
+  .completar.hecha {
+    color: var(--ok);
+    border-color: var(--ok);
+    background: var(--ok-soft);
+  }
+  .completar.hecha svg {
+    opacity: 1;
+  }
+  .completar.grande {
+    font-size: 13.5px;
+    padding: 12px 20px;
+  }
+</style>

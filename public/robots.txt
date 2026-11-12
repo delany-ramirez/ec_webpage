@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /pagefind/
+
+Sitemap: https://ec.delanyr.dev/sitemap-index.xml

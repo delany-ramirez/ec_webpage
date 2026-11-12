@@ -1,0 +1,38 @@
+{
+  "name": "ec-delanyr",
+  "type": "module",
+  "version": "0.1.0",
+  "private": true,
+  "engines": {
+    "node": ">=22"
+  },
+  "description": "Portal web del curso Análisis Estadístico (AS001) — ec.delanyr.dev",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "postbuild": "pagefind --quiet && node scripts/verificar-sin-soluciones.mjs",
+    "preview": "astro preview",
+    "astro": "astro",
+    "check": "astro check",
+    "e2e": "node scripts/e2e-progreso.mjs && node scripts/e2e-busqueda.mjs"
+  },
+  "dependencies": {
+    "@astrojs/mdx": "^4.3.0",
+    "@astrojs/sitemap": "^3.7.3",
+    "astro": "^5.18.0",
+    "katex": "^0.16.22",
+    "rehype-katex": "^7.0.1",
+    "remark-math": "^6.0.0"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.4",
+    "pagefind": "^1.5.2",
+    "typescript": "^5.9.0"
+  },
+  "allowScripts": {
+    "esbuild@0.27.7": true,
+    "esbuild@0.25.12": true,
+    "sharp@0.34.5": true
+  }
+}

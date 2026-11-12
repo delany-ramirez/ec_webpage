@@ -1,0 +1,200 @@
+{
+  "modulo": 1,
+  "preguntas": [
+    {
+      "id": "s1-01",
+      "leccion": "01-datos-variabilidad",
+      "pregunta": "Un laboratorio mide 3 veces el espesor de cada una de 10 piezas. ¿Cuántas réplicas tiene el estudio?",
+      "opciones": [
+        "30",
+        "3",
+        "10",
+        "13"
+      ],
+      "correcta": 2,
+      "explicacion": "Cada pieza es una unidad experimental: hay 10 réplicas. Las 3 lecturas sobre la misma pieza son repeticiones; solo informan sobre el sistema de medición, no sobre la variabilidad entre piezas."
+    },
+    {
+      "id": "s1-02",
+      "leccion": "01-datos-variabilidad",
+      "pregunta": "El histograma de 120 volúmenes de llenado muestra dos picos. ¿Qué es lo primero que conviene hacer?",
+      "opciones": [
+        "Estratificar por una variable candidata a causa asignable (boquilla, turno, lote)",
+        "Aplicar Shapiro-Wilk y, si rechaza, transformar los datos con logaritmo",
+        "Eliminar los datos de uno de los picos como atípicos",
+        "Aumentar el tamaño de muestra hasta que el histograma tenga un solo pico"
+      ],
+      "correcta": 0,
+      "explicacion": "La bimodalidad casi siempre delata una mezcla de poblaciones. Estratificar (por boquilla, en el caso del curso) revela la causa asignable: B1 sobrellena y B2 subllena. La acción es calibrar, no transformar ni borrar datos."
+    },
+    {
+      "id": "s1-03",
+      "leccion": "01-datos-variabilidad",
+      "pregunta": "¿Qué justifica, sobre todo, tratar los errores como independientes en las pruebas del curso?",
+      "opciones": [
+        "La estratificación",
+        "Usar la mediana en lugar de la media",
+        "Medir varias veces cada unidad",
+        "La aleatorización del orden o de la asignación"
+      ],
+      "correcta": 3,
+      "explicacion": "Aleatorizar protege contra fuentes de variación desconocidas que cambian en el tiempo (desgaste, temperatura, fatiga) y respalda el supuesto de independencia de los errores."
+    },
+    {
+      "id": "s1-04",
+      "leccion": "02-descriptiva-comparativa",
+      "pregunta": "Con ȳ = 500.2 mL y s = 1.9 mL, bajo normalidad, ¿qué fracción de envases esperarías fuera de 500 ± 4 mL?",
+      "opciones": [
+        "Cerca de 0.3 %",
+        "Cerca de 3.6 %",
+        "Cerca de 5 %",
+        "Cerca de 32 %"
+      ],
+      "correcta": 1,
+      "explicacion": "z inferior = (496 − 500.2)/1.9 ≈ −2.21 y z superior = (504 − 500.2)/1.9 = 2.0. P = Φ(−2.21) + 1 − Φ(2.0) ≈ 0.014 + 0.023 ≈ 0.036. El descentrado de 0.2 mL pesa más hacia el límite superior."
+    },
+    {
+      "id": "s1-05",
+      "leccion": "02-descriptiva-comparativa",
+      "pregunta": "¿Por qué un diagrama de cajas puede engañar al comparar grupos?",
+      "opciones": [
+        "Porque no muestra la mediana",
+        "Porque marca como atípicos todos los valores fuera de ±2s",
+        "Porque oculta la forma de la distribución, por ejemplo una bimodalidad",
+        "Porque solo sirve para dos grupos"
+      ],
+      "correcta": 2,
+      "explicacion": "La caja resume mediana, cuartiles y atípicos, pero dos modas pueden quedar dentro de la misma caja. Por eso se recomienda combinarla con un violín o histograma y superponer los datos cuando n es pequeño."
+    },
+    {
+      "id": "s1-06",
+      "leccion": "02-descriptiva-comparativa",
+      "pregunta": "Un dato cae fuera de las vallas de Tukey [Q₁ − 1.5·RIC, Q₃ + 1.5·RIC]. ¿Qué se hace con él?",
+      "opciones": [
+        "Se investiga: puede ser un error de registro, una causa asignable o un valor legítimo de la cola",
+        "Se elimina antes de calcular la media",
+        "Se reemplaza por la mediana",
+        "Se ignora si el valor p de Shapiro-Wilk es mayor que 0.05"
+      ],
+      "correcta": 0,
+      "explicacion": "Un atípico no se borra por ser atípico. Si es error de registro se corrige; si es una causa asignable se documenta y se actúa; si es un valor legítimo, se conserva."
+    },
+    {
+      "id": "s1-07",
+      "leccion": "03-normalidad-tcl",
+      "pregunta": "En el gráfico Q-Q de una muestra aparece un escalón o quiebre en el centro. ¿Qué sugiere?",
+      "opciones": [
+        "Colas más pesadas que la normal",
+        "Una mezcla de poblaciones",
+        "Asimetría a la derecha",
+        "Datos perfectamente normales"
+      ],
+      "correcta": 1,
+      "explicacion": "Un quiebre en el centro del Q-Q es la firma de una mezcla (bimodalidad). La forma de U o J indica asimetría y la de S, colas distintas a las de la normal."
+    },
+    {
+      "id": "s1-08",
+      "leccion": "03-normalidad-tcl",
+      "pregunta": "Los tiempos de atención de un centro de servicio son muy asimétricos. Con n = 36 clientes por día, ¿qué permite el TCL?",
+      "opciones": [
+        "Calcular con la normal la fracción de clientes que esperan más de 20 min",
+        "Usar la prueba χ² para la varianza sin verificar normalidad",
+        "Concluir que los tiempos individuales son normales",
+        "Tratar el tiempo medio diario como aproximadamente normal"
+      ],
+      "correcta": 3,
+      "explicacion": "El TCL habla de la media muestral, no de los datos individuales. Justifica la normalidad aproximada de ȳ, pero no autoriza a calcular proporciones de clientes individuales con la normal ni protege a las pruebas de varianza."
+    },
+    {
+      "id": "s1-09",
+      "leccion": "03-normalidad-tcl",
+      "pregunta": "Si σ = 6 min, ¿cuál es el error estándar de la media con n = 36?",
+      "opciones": [
+        "1 min",
+        "6 min",
+        "0.17 min",
+        "36 min"
+      ],
+      "correcta": 0,
+      "explicacion": "El error estándar es σ/√n = 6/√36 = 6/6 = 1 min."
+    },
+    {
+      "id": "s1-10",
+      "leccion": "04-intervalos-confianza",
+      "pregunta": "Un IC del 95 % para la media es [50.64, 51.91] µm. ¿Cuál interpretación es correcta?",
+      "opciones": [
+        "Hay 95 % de probabilidad de que μ esté entre 50.64 y 51.91",
+        "El 95 % de las piezas tiene espesor entre 50.64 y 51.91",
+        "El 95 % de los intervalos construidos así, en muestreos repetidos, contendría a μ",
+        "Si se repite el muestreo, el 95 % de las medias caerá en ese intervalo"
+      ],
+      "correcta": 2,
+      "explicacion": "La confianza es del procedimiento: un intervalo ya calculado contiene a μ o no. Tampoco describe piezas individuales (eso sería un intervalo de tolerancia o de predicción)."
+    },
+    {
+      "id": "s1-11",
+      "leccion": "04-intervalos-confianza",
+      "pregunta": "Si duplicas el tamaño de muestra, ¿qué pasa aproximadamente con la amplitud del IC para μ?",
+      "opciones": [
+        "Se reduce a la mitad",
+        "Se multiplica por 1/√2 ≈ 0.71",
+        "No cambia",
+        "Se reduce a la cuarta parte"
+      ],
+      "correcta": 1,
+      "explicacion": "El semiancho es t·s/√n: al pasar de n a 2n se divide por √2. Para reducir el intervalo a la mitad hay que cuadruplicar n."
+    },
+    {
+      "id": "s1-12",
+      "leccion": "04-intervalos-confianza",
+      "pregunta": "¿Qué intervalo es más sensible a que los datos no sean normales?",
+      "opciones": [
+        "El IC para la media con la t",
+        "Ambos por igual",
+        "Ninguno, gracias al TCL",
+        "El IC para la varianza con la χ²"
+      ],
+      "correcta": 3,
+      "explicacion": "La t es robusta a la no normalidad gracias al TCL; la χ² y la F no lo son. Por eso el IC y la prueba para σ² exigen verificar la normalidad con más cuidado."
+    },
+    {
+      "id": "s1-13",
+      "leccion": "05-pruebas-hipotesis",
+      "pregunta": "Un analista obtiene p = 0.07 con α = 0.05 y concluye: «el proceso está centrado en 500 mL». ¿Qué está mal?",
+      "opciones": [
+        "No rechazar H₀ no demuestra H₀; solo indica falta de evidencia en contra",
+        "Nada: p > α demuestra H₀",
+        "Debió usar α = 0.10 para que fuera significativo",
+        "El valor p es la probabilidad de que H₀ sea falsa"
+      ],
+      "correcta": 0,
+      "explicacion": "No rechazar significa que no hay evidencia suficiente para afirmar que la media difiere de 500 mL. Para afirmar que está centrado se mira el IC y la potencia del estudio. Cambiar α después de ver los datos invalida la prueba."
+    },
+    {
+      "id": "s1-14",
+      "leccion": "05-pruebas-hipotesis",
+      "pregunta": "En el control de un proceso, detener la línea por una alarma cuando en realidad el proceso estaba bien es un error…",
+      "opciones": [
+        "Tipo II (no detectar, riesgo del consumidor)",
+        "De medición",
+        "Tipo I (falsa alarma, riesgo del productor)",
+        "De muestreo no aleatorio"
+      ],
+      "correcta": 2,
+      "explicacion": "Rechazar H₀ siendo verdadera es el error tipo I, con probabilidad α. No detectar un cambio real (y despachar producto no conforme) es el error tipo II, con probabilidad β."
+    },
+    {
+      "id": "s1-15",
+      "leccion": "05-pruebas-hipotesis",
+      "pregunta": "«El nuevo proveedor reduce la variabilidad del espesor (antes σ = 2.5 µm)». ¿Cómo se plantean las hipótesis?",
+      "opciones": [
+        "H₀: σ = 2.5 · H₁: σ ≠ 2.5",
+        "H₀: σ ≥ 2.5 · H₁: σ < 2.5",
+        "H₀: σ ≤ 2.5 · H₁: σ > 2.5",
+        "H₀: σ < 2.5 · H₁: σ ≥ 2.5"
+      ],
+      "correcta": 1,
+      "explicacion": "Lo que se quiere demostrar va en H₁ (σ < 2.5, cola izquierda) y H₀ contiene la igualdad. La alternativa se fija antes de ver los datos, a partir de la pregunta del proceso."
+    }
+  ]
+}

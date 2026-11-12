@@ -1,0 +1,51 @@
+---
+import Base from "../layouts/Base.astro";
+---
+
+<Base title="Página no encontrada">
+  <main class="wrap no-encontrada" id="contenido">
+    <span class="eyebrow">Error 404</span>
+    <h1>Esta página no existe <span class="g">(o se movió)</span></h1>
+    <p>
+      Puede que el contenido haya cambiado de lugar al actualizar el curso. Prueba con el
+      buscador (<kbd>Ctrl</kbd> <kbd>K</kbd>) o vuelve al inicio.
+    </p>
+    <div class="acciones">
+      <a href="/" class="btn btn-primary">Ir al inicio</a>
+      <a href="/#programa" class="btn btn-ghost">Ver el programa</a>
+      <button type="button" class="btn btn-ghost" data-buscador-abrir>Buscar</button>
+    </div>
+  </main>
+</Base>
+
+<style>
+  .no-encontrada {
+    padding: 96px 0 120px;
+    max-width: 640px;
+  }
+  h1 {
+    font-size: clamp(30px, 5vw, 48px);
+    margin: 16px 0 18px;
+  }
+  h1 .g {
+    color: var(--muted-2);
+    font-weight: 400;
+  }
+  p {
+    color: var(--muted);
+    font-size: 16.5px;
+    margin-bottom: 30px;
+  }
+  kbd {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    border: 1px solid var(--line-strong);
+    border-radius: 5px;
+    padding: 2px 6px;
+  }
+  .acciones {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+</style>

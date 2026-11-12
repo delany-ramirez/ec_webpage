@@ -1,0 +1,390 @@
+---
+/**
+ * Temario: pre-trabajos, acordeón por sesión (lecciones, ejercicios, taller, autoevaluación) y
+ * recursos. Se renderiza en build con todo el curso; el estado abierto/cerrado y el drawer
+ * móvil los maneja scripts/sidebar.ts.
+ */
+import {
+  MODULOS,
+  docsDelGrupo,
+  leccionesPorModulo,
+  ejerciciosPorModulo,
+  tituloHtml,
+  claveProgreso,
+  nn,
+} from "../lib/curso";
+import { modulosConAutoevaluacion } from "../lib/interactivos";
+
+interface Props {
+  /** id de la entrada activa (lección o ejercicio), para resaltarla */
+  activo?: string;
+  /** sesión activa (abre su acordeón aunque la página no sea una lección) */
+  moduloActivo?: number;
+}
+const { activo, moduloActivo } = Astro.props;
+
+const lecciones = await leccionesPorModulo();
+const ejercicios = await ejerciciosPorModulo();
+const conAuto = await modulosConAutoevaluacion();
+const rutaActual = Astro.url.pathname;
+
+const docsPre = docsDelGrupo("pre");
+const docsRecursos = docsDelGrupo("recursos");
+const enPre = rutaActual.startsWith("/pre-trabajos/");
+---
+
+<aside class="sidebar" id="sidebar" aria-label="Temario del curso">
+  <div class="sb-top">
+    <span class="sb-titulo">Temario</span>
+    <button type="button" class="icon-btn sb-cerrar" data-sidebar-cerrar aria-label="Cerrar temario">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+  </div>
+
+  <a href="/progreso/" class="sb-progreso" title="Ver y exportar tu progreso">
+    <span class="sb-progreso-txt"><span>Progreso</span><span data-progreso-texto>0 / 0 · 0%</span></span>
+    <span class="sb-barra"><span class="fill" data-progreso-global></span></span>
+  </a>
+
+  <div class="sb-modulos">
+    <details class="sb-mod" data-modulo="0" open={enPre || undefined}>
+      <summary class:list={{ "en-modulo": enPre }}>
+        <span class="sb-num">P</span>
+        <span class="sb-nombre">Pre-trabajos</span>
+        <span class="sb-cuenta">{docsPre.length}</span>
+        <svg class="sb-flecha" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+      </summary>
+      <div class="sb-cuerpo">
+        <ol class="sb-lecciones">
+          {docsPre.map((d) => (
+            <li>
+              <a href={d.ruta} class:list={["sb-leccion", "sb-doc-lista", { activo: rutaActual === d.ruta }]} aria-current={rutaActual === d.ruta ? "page" : undefined}>
+                <span class="sb-t">{d.nav}</span>
+              </a>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </details>
+
+    {MODULOS.map((m) => {
+      const ls = lecciones.get(m.numero) ?? [];
+      const ejs = ejercicios.get(m.numero) ?? [];
+      const vacio = ls.length === 0;
+      const abierto = moduloActivo === m.numero;
+      const enModulo = rutaActual.startsWith(`/sesion/${m.numero}/`);
+      return (
+        <details class:list={["sb-mod", { vacio }]} data-modulo={m.numero} open={abierto || undefined}>
+          <summary class:list={{ "en-modulo": enModulo }}>
+            <span class="sb-num">S{m.numero}</span>
+            <span class="sb-nombre">{m.corto}</span>
+            <span class="sb-cuenta" data-cuenta-modulo={m.numero}>{vacio ? "—" : ls.length}</span>
+            <svg class="sb-flecha" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+          </summary>
+          <div class="sb-cuerpo">
+            <a href={`/sesion/${m.numero}/`} class:list={["sb-indice", { activo: rutaActual === `/sesion/${m.numero}/` }]}>
+              Agenda y materiales
+            </a>
+            {vacio ? (
+              <p class="sb-vacio">En construcción</p>
+            ) : (
+              <ol class="sb-lecciones">
+                {ls.map((l) => (
+                  <li>
+                    <a href={l.ruta} class:list={["sb-leccion", { activo: l.id === activo }]} aria-current={l.id === activo ? "page" : undefined}>
+                      <span class="marca" data-marca={claveProgreso(l)} aria-hidden="true"></span>
+                      <span class="sb-n">{nn(l.orden)}</span>
+                      <span class="sb-t" set:html={tituloHtml(l.titulo)} />
+                    </a>
+                  </li>
+                ))}
+              </ol>
+            )}
+            {(ejs.length > 0 || conAuto.has(m.numero)) && (
+              <div class="sb-extra">
+                {ejs.map((e) => (
+                  <a href={e.ruta} class:list={["sb-chip", { quiz: e.taller, activo: e.id === activo }]}>{e.rotulo}</a>
+                ))}
+                {conAuto.has(m.numero) && (
+                  <a href={`/sesion/${m.numero}/autoevaluacion/`} class:list={["sb-chip", "auto", { activo: rutaActual === `/sesion/${m.numero}/autoevaluacion/` }]}>Autoevaluación</a>
+                )}
+              </div>
+            )}
+          </div>
+        </details>
+      );
+    })}
+  </div>
+
+  <nav class="sb-docs" aria-label="Recursos del curso">
+    {docsRecursos.map((d) => (
+      <a href={d.ruta} class:list={["sb-doc", { activo: rutaActual === d.ruta }]}>{d.nav}</a>
+    ))}
+  </nav>
+</aside>
+<div class="sb-fondo" data-sidebar-fondo hidden></div>
+
+<style>
+  .sidebar {
+    font-size: 13.5px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  @media (min-width: 960px) {
+    .sidebar {
+      position: sticky;
+      top: 78px;
+      max-height: calc(100dvh - 78px);
+      overflow-y: auto;
+      scrollbar-width: thin;
+      padding-bottom: 24px;
+      padding-right: 6px;
+    }
+  }
+  .sb-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .sb-titulo {
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--gold);
+  }
+  .sb-cerrar {
+    display: none;
+  }
+
+  .sb-progreso {
+    display: block;
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--surface);
+    transition: border-color 0.2s;
+  }
+  .sb-progreso:hover {
+    border-color: var(--gold);
+  }
+  .sb-progreso-txt {
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  .sb-progreso-txt span:last-child {
+    color: var(--gold);
+  }
+  .sb-barra {
+    display: block;
+    height: 4px;
+    border-radius: 4px;
+    background: var(--line-strong);
+    overflow: hidden;
+  }
+  .sb-barra .fill {
+    display: block;
+    height: 100%;
+    width: 0;
+    background: var(--gold);
+    transition: width 0.4s;
+  }
+
+  .sb-docs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--line);
+  }
+  .sb-doc {
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    color: var(--muted);
+    border: 1px solid var(--line);
+    border-radius: 100px;
+    padding: 4px 10px;
+    transition: color 0.2s, border-color 0.2s;
+  }
+  .sb-doc:hover,
+  .sb-doc.activo {
+    color: var(--gold);
+    border-color: var(--gold);
+  }
+
+  .sb-mod {
+    border-bottom: 1px solid var(--line);
+  }
+  .sb-mod summary {
+    list-style: none;
+    display: grid;
+    grid-template-columns: 30px 1fr auto 16px;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 6px;
+    cursor: pointer;
+    border-radius: 8px;
+    color: var(--text);
+    transition: background 0.2s;
+  }
+  .sb-mod summary::-webkit-details-marker {
+    display: none;
+  }
+  .sb-mod summary:hover {
+    background: var(--surface);
+  }
+  .sb-mod summary.en-modulo .sb-nombre {
+    color: var(--gold);
+  }
+  .sb-num {
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    color: var(--gold);
+  }
+  .sb-nombre {
+    font-weight: 500;
+  }
+  .sb-cuenta {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--muted-2);
+  }
+  .sb-flecha {
+    width: 16px;
+    height: 16px;
+    color: var(--muted-2);
+    transition: transform 0.2s;
+  }
+  .sb-mod[open] .sb-flecha {
+    transform: rotate(180deg);
+  }
+  .sb-mod.vacio summary {
+    color: var(--muted-2);
+  }
+
+  .sb-cuerpo {
+    padding: 0 0 12px 6px;
+  }
+  .sb-indice {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    color: var(--muted-2);
+    padding: 4px 6px 8px 32px;
+  }
+  .sb-indice:hover,
+  .sb-indice.activo {
+    color: var(--gold);
+  }
+  .sb-vacio {
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    color: var(--muted-2);
+    padding: 2px 6px 4px 32px;
+  }
+  .sb-lecciones {
+    list-style: none;
+  }
+  .sb-leccion {
+    display: grid;
+    grid-template-columns: 14px 24px 1fr;
+    gap: 6px;
+    align-items: start;
+    padding: 6px 6px;
+    border-radius: 7px;
+    color: var(--muted);
+    line-height: 1.4;
+    transition: background 0.2s, color 0.2s;
+  }
+  .sb-leccion:hover {
+    background: var(--surface);
+    color: var(--text);
+  }
+  .sb-leccion.activo {
+    background: var(--gold-soft);
+    color: var(--text);
+  }
+  .sb-leccion .marca {
+    width: 12px;
+    height: 12px;
+    margin-top: 4px;
+    border-radius: 50%;
+    border: 1.5px solid var(--line-strong);
+  }
+  .sb-leccion .marca.hecha {
+    border-color: var(--ok);
+    background: var(--ok);
+  }
+  .sb-n {
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    color: var(--gold);
+    padding-top: 1px;
+  }
+  .sb-t :global(code) {
+    font-family: var(--font-mono);
+    font-size: 0.9em;
+  }
+  .sb-extra {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 8px 6px 0 32px;
+  }
+  .sb-chip {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--muted);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 3px 8px;
+    transition: color 0.2s, border-color 0.2s;
+  }
+  .sb-chip:hover,
+  .sb-chip.activo {
+    color: var(--gold);
+    border-color: var(--gold);
+  }
+  .sb-chip.quiz {
+    border-style: dashed;
+  }
+  .sb-chip.auto {
+    color: var(--gold);
+  }
+
+  /* drawer móvil */
+  .sb-fondo {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    z-index: 60;
+  }
+  @media (max-width: 959px) {
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: min(320px, 88vw);
+      background: var(--ink);
+      border-right: 1px solid var(--line);
+      padding: 18px 16px;
+      overflow-y: auto;
+      z-index: 70;
+      transform: translateX(-100%);
+      transition: transform 0.25s ease;
+    }
+    .sidebar.abierto {
+      transform: none;
+    }
+    .sb-cerrar {
+      display: inline-flex;
+    }
+  }
+</style>

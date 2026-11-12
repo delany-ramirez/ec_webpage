@@ -1,0 +1,13 @@
+---
+/**
+ * JSON con las claves de progreso de todas las lecciones por sesión, para que progress-ui.ts
+ * calcule porcentajes en páginas sin temario (landing, /progreso/).
+ */
+import { leccionesPorModulo, claveProgreso } from "../lib/curso";
+
+const porModulo = await leccionesPorModulo();
+const indice: Record<string, string[]> = {};
+for (const [n, ls] of porModulo) indice[String(n)] = ls.map(claveProgreso);
+---
+
+<script is:inline type="application/json" id="curso-indice" set:html={JSON.stringify(indice)} />

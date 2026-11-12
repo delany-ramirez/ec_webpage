@@ -1,0 +1,117 @@
+---
+/**
+ * Layout de tres columnas para todo lo que está "dentro" del curso: lecciones, ejercicios,
+ * autoevaluación, índices de sesión y documentos. Sidebar (temario) · contenido · TOC.
+ *   ≥1280 px: las tres columnas.  960–1279: sidebar + contenido.  <960: drawer + contenido.
+ */
+import type { MarkdownHeading } from "astro";
+import Base from "./Base.astro";
+import Sidebar from "../components/Sidebar.astro";
+import Toc from "../components/Toc.astro";
+
+interface Props {
+  title: string;
+  description?: string;
+  activo?: string;
+  moduloActivo?: number;
+  headings?: MarkdownHeading[];
+  /** etiqueta para la búsqueda: Lección, Ejercicio, Taller, Autoevaluación, Sesión, Documento */
+  tipo?: string;
+}
+const { title, description, activo, moduloActivo, headings = [], tipo = "Página" } = Astro.props;
+
+---
+
+<Base title={title} description={description}>
+  <div class="curso-barra">
+    <div class="wrap curso-barra-inner">
+      <button type="button" class="btn btn-ghost btn-sm" data-sidebar-abrir>
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+        Temario
+      </button>
+      <slot name="miga" />
+    </div>
+  </div>
+
+  <div class="wrap curso-grid">
+    <div class="col-sidebar">
+      <Sidebar activo={activo} moduloActivo={moduloActivo} />
+    </div>
+    <main class="col-contenido" id="contenido" data-pagefind-body>
+      <!-- Pagefind: un atributo por metadato (no admite varios separados por coma) -->
+      <span data-pagefind-meta={`tipo:${tipo}`} hidden></span>
+      {moduloActivo && <span data-pagefind-meta={`modulo:${moduloActivo}`} hidden></span>}
+      <slot />
+    </main>
+    <div class="col-toc">
+      <Toc headings={headings} />
+    </div>
+  </div>
+
+  <script>
+    import { iniciarSidebar } from "../scripts/sidebar";
+    import { iniciarToc } from "../scripts/toc";
+    iniciarSidebar();
+    iniciarToc();
+  </script>
+</Base>
+
+<style>
+  .curso-grid {
+    max-width: 1320px;
+    display: grid;
+    grid-template-columns: 264px minmax(0, 1fr) 208px;
+    gap: 44px;
+    align-items: start;
+    padding-top: 28px;
+    /* sin z-index propio: el drawer móvil (position: fixed) debe quedar sobre la nav */
+    z-index: auto;
+  }
+  .col-sidebar {
+    align-self: stretch;
+  }
+  .col-toc {
+    position: sticky;
+    top: 78px;
+    max-height: calc(100dvh - 78px);
+    overflow-y: auto;
+    scrollbar-width: thin;
+    padding-bottom: 24px;
+  }
+  .col-contenido {
+    min-width: 0;
+  }
+  .curso-barra {
+    display: none;
+    border-bottom: 1px solid var(--line);
+    background: var(--nav-bg);
+    backdrop-filter: blur(12px);
+    position: sticky;
+    top: 62px;
+    z-index: 40;
+  }
+  .curso-barra-inner {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    height: 48px;
+  }
+  @media (max-width: 1279px) {
+    .curso-grid {
+      grid-template-columns: 250px minmax(0, 1fr);
+      gap: 36px;
+    }
+    .col-toc {
+      display: none;
+    }
+  }
+  @media (max-width: 959px) {
+    .curso-grid {
+      grid-template-columns: minmax(0, 1fr);
+      padding-top: 8px;
+    }
+    .curso-barra {
+      display: block;
+    }
+  }
+</style>

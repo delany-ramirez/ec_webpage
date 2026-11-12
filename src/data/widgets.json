@@ -1,0 +1,23 @@
+[
+  {
+    "archivo": "tcl.html",
+    "titulo": "Teorema Central del Límite: datos frente a medias",
+    "descripcion": "Elige una población (normal, asimétrica, uniforme o bimodal) y un tamaño de muestra: el panel izquierdo muestra los datos individuales y el derecho las medias de 3000 muestras con la curva N(μ, σ²/n). Compara el error estándar teórico con el observado.",
+    "leccion": "1/03-normalidad-tcl",
+    "alto": 560
+  },
+  {
+    "archivo": "cobertura-ic.html",
+    "titulo": "Cobertura de intervalos de confianza",
+    "descripcion": "Cada clic toma 100 muestras del proceso y dibuja su IC para μ; en rojo los que no contienen el verdadero valor. Cambia n, el nivel de confianza y la forma del proceso para ver cuándo la cobertura real se aparta de la nominal.",
+    "leccion": "1/04-intervalos-confianza",
+    "alto": 640
+  },
+  {
+    "archivo": "potencia.html",
+    "titulo": "Potencia y tamaño de muestra de la prueba t",
+    "descripcion": "Mueve δ, σ, n y α: las áreas sombreadas son α, β y la potencia sobre las distribuciones del estadístico t bajo H₀ y H₁, y la curva muestra cómo crece la potencia con n. Los valores coinciden con power.t.test() de R.",
+    "leccion": "2/02-potencia-tamano-muestra",
+    "alto": 640
+  }
+]
