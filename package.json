@@ -21,6 +21,7 @@
     "@astrojs/mdx": "^4.3.0",
     "@astrojs/sitemap": "^3.7.3",
     "astro": "^5.18.0",
+    "hast-util-to-html": "^9.0.6",
     "katex": "^0.16.22",
     "rehype-katex": "^7.0.1",
     "remark-math": "^6.0.0"
