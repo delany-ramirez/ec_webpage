@@ -1,12 +1,16 @@
 ---
-/** Índice de la página (columna derecha, ≥1280 px). Resalta la sección visible (scripts/toc.ts). */
+/**
+ * Índice de la página (columna derecha, ≥1280 px). Resalta la sección visible (scripts/toc.ts).
+ * El H1 del título se quita del Markdown (remark-quitar-h1), así que un H1 que quede en el cuerpo
+ * agrupa secciones («# Opción A — …») y se muestra como rótulo de grupo.
+ */
 import type { MarkdownHeading } from "astro";
 
 interface Props {
   headings: MarkdownHeading[];
 }
 const { headings } = Astro.props;
-const items = headings.filter((h) => h.depth === 2 || h.depth === 3);
+const items = headings.filter((h) => h.depth >= 1 && h.depth <= 3);
 ---
 
 {items.length > 0 && (
@@ -47,6 +51,16 @@ const items = headings.filter((h) => h.depth === 2 || h.depth === 3);
     border-left: 1px solid transparent;
     color: var(--muted);
     transition: color 0.2s, border-color 0.2s;
+  }
+  .toc li.d1:not(:first-child) {
+    margin-top: 10px;
+  }
+  .toc li.d1 a {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text);
   }
   .toc li.d3 a {
     padding-left: 26px;

@@ -524,6 +524,10 @@ footer.foot {
   font-size: 14.5px;
   display: block;
   overflow-x: auto;
+  /* `anywhere` (heredado de .prose) hace que el ancho mínimo de cada palabra sea una letra y
+     la tabla reparte columnas angostas que parten palabras («Requisit-os»). `break-word` solo
+     parte lo que no cabe; si la tabla queda más ancha, desplaza dentro de sí misma. */
+  overflow-wrap: break-word;
 }
 .prose thead th {
   font-family: var(--font-mono);
