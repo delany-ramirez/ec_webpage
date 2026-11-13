@@ -3,6 +3,7 @@ import { getCollection, render } from "astro:content";
 import Curso from "../../../layouts/Curso.astro";
 import Cabecera from "../../../components/Cabecera.astro";
 import Notebooks from "../../../components/Notebooks.astro";
+import Paquete from "../../../components/Paquete.astro";
 import { MODULOS, parseLeccion, lecciones, ejerciciosDe, tituloHtml, claveProgreso, nn } from "../../../lib/curso";
 import { modulosConAutoevaluacion, widgetsDe, widgetsDelModulo } from "../../../lib/interactivos";
 import { notebooksDe } from "../../../lib/notebooks-fs";
@@ -50,6 +51,8 @@ const nextMod = i < MODULOS.length - 1 ? MODULOS[i + 1] : null;
       </>
     )}
   </Cabecera>
+
+  {!vacio && <Paquete carpeta={modulo.carpeta} />}
 
   {!vacio && (
     <section class="ruta rise">

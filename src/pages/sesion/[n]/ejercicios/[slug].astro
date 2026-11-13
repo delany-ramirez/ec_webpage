@@ -4,7 +4,7 @@ import Curso from "../../../../layouts/Curso.astro";
 import Cabecera from "../../../../components/Cabecera.astro";
 import PrevNext from "../../../../components/PrevNext.astro";
 import NotebooksCitados from "../../../../components/NotebooksCitados.astro";
-import { urlPaquete } from "../../../../lib/rutas";
+import Paquete from "../../../../components/Paquete.astro";
 import { parseLeccion, ejerciciosDe, tituloTexto, etiquetaSesion, nn } from "../../../../lib/curso";
 import { practicasDeEjercicio } from "../../../../lib/notebooks-fs";
 
@@ -41,6 +41,13 @@ const next = i < hermanos.length - 1 ? hermanos[i + 1] : null;
     {leccion.peso && <span class="chip">Calificable · {leccion.peso}</span>}
   </Cabecera>
 
+  <Paquete
+    carpeta={leccion.modulo.carpeta}
+    nota={leccion.taller
+      ? `Datos y plantilla del taller, junto con el resto del material de la Sesión ${leccion.modulo.numero}.`
+      : `Datos del ejercicio y prácticas de la Sesión ${leccion.modulo.numero}, listos para hacer Knit.`}
+  />
+
   {practicas.length > 0 && (
     <aside class="apoyo rise d1">
       <NotebooksCitados practicas={practicas} etiqueta="Práctica de apoyo" />
@@ -51,13 +58,11 @@ const next = i < hermanos.length - 1 ? hermanos[i + 1] : null;
     <Content />
   </article>
 
-  <aside class="aviso rise d2" data-pagefind-ignore>
-    {leccion.taller ? (
-      <><strong>Entrega.</strong> El taller se entrega en la plataforma al cierre de la sesión: la plantilla <code>.Rmd</code> diligenciada y el <code>.html</code> compilado. Su solución es material del docente y no se publica.</>
-    ) : (
-      <><strong>Archivos.</strong> Descarga el <a href={urlPaquete(leccion.modulo.carpeta)} download>material de la sesión (.zip)</a>: trae las prácticas, los datos y los enunciados con la estructura de carpetas que esperan las rutas <code>../datos/</code>.</>
-    )}
-  </aside>
+  {leccion.taller && (
+    <aside class="aviso rise d2" data-pagefind-ignore>
+      <strong>Entrega.</strong> El taller se entrega en la plataforma al cierre de la sesión: la plantilla <code>.Rmd</code> diligenciada y el <code>.html</code> compilado. Su solución es material del docente y no se publica.
+    </aside>
+  )}
 
   <PrevNext prev={prev} next={next} etiquetas={["← Ejercicio anterior", "Ejercicio siguiente →"]} />
 </Curso>

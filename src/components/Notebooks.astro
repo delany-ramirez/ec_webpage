@@ -1,12 +1,11 @@
 ---
 /**
- * Tarjetas de las prácticas R Markdown de una sesión con botones Descargar / GitHub, y el
- * paquete .zip de la sesión (prácticas + datos con su estructura de carpetas).
+ * Tarjetas de las prácticas R Markdown de una sesión con botones Descargar / GitHub. El paquete
+ * .zip de la sesión (prácticas + datos con su estructura de carpetas) va arriba, en <Paquete>.
  * Los datos salen del sistema de archivos del submodule (lib/notebooks-fs.ts); la descripción
  * es la de la tabla «Prácticas» del README de la sesión.
  */
 import { notebooksDe } from "../lib/notebooks-fs";
-import { moduloPorNumero, urlPaquete } from "../lib/rutas";
 import { tituloHtml, nn } from "../lib/curso";
 
 interface Props {
@@ -14,7 +13,6 @@ interface Props {
 }
 const { modulo } = Astro.props;
 const lista = notebooksDe(modulo);
-const carpeta = moduloPorNumero(modulo)?.carpeta ?? "";
 ---
 
 {lista.length > 0 && (
@@ -22,14 +20,10 @@ const carpeta = moduloPorNumero(modulo)?.carpeta ?? "";
     <div class="nbs-head">
       <span class="eyebrow" id="nbs-titulo">Prácticas en R</span>
       <span class="nbs-nota">
-        Las prácticas leen los datos de <code>../datos/</code>: descarga el paquete de la sesión,
-        descomprímelo y abre cada <code>.Rmd</code> en RStudio para hacer <em>Knit</em>.
+        Las prácticas leen los datos de <code>../datos/</code>: usa el <code>.zip</code> de la sesión
+        (arriba en esta página), descomprímelo y abre cada <code>.Rmd</code> para hacer <em>Knit</em>.
       </span>
     </div>
-    <a class="btn btn-primary btn-sm paquete" href={urlPaquete(carpeta)} download>
-      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M5 21h14" /></svg>
-      Descargar material de la sesión (.zip)
-    </a>
     <ul class="nbs-lista">
       {lista.map((nb) => (
         <li class="nb">
@@ -68,10 +62,6 @@ const carpeta = moduloPorNumero(modulo)?.carpeta ?? "";
   .nbs-nota code {
     font-family: var(--font-mono);
     font-size: 0.9em;
-  }
-  .paquete {
-    gap: 6px;
-    margin-bottom: 14px;
   }
   .nbs-lista {
     list-style: none;

@@ -12,29 +12,13 @@ import fs from "node:fs";
 import path from "node:path";
 import zlib from "node:zlib";
 import type { AstroIntegration } from "astro";
-import { MODULOS, esDelDocente, esDescargable } from "../lib/rutas";
-import { RAIZ_CONTENIDO } from "../lib/notebooks-fs";
+import { esDescargable } from "../lib/rutas";
+import { PAQUETES, RAIZ_CONTENIDO, recorrer, contenidoPaquete } from "../lib/paquetes";
 
-/** Carpetas con paquete .zip propio. */
-export const PAQUETES = [...MODULOS.map((m) => m.carpeta), "pre-trabajos"];
-
-function* recorrer(dir: string): Generator<string> {
-  if (!fs.existsSync(dir)) return;
-  for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
-    if (e.name.startsWith(".")) continue;
-    const abs = path.join(dir, e.name);
-    if (e.isDirectory()) yield* recorrer(abs);
-    else yield path.relative(RAIZ_CONTENIDO, abs).split(path.sep).join("/");
-  }
-}
+const CARPETAS = PAQUETES.map((p) => p.carpeta);
 
 function descargables(): string[] {
   return [...recorrer(RAIZ_CONTENIDO)].filter(esDescargable);
-}
-
-function contenidoPaquete(carpeta: string): string[] {
-  const propios = [...recorrer(path.join(RAIZ_CONTENIDO, carpeta))].filter((r) => /\.(md|Rmd|csv)$/i.test(r) && !esDelDocente(r));
-  return ["install.R", ...propios];
 }
 
 // ---------------------------------------------------------------------------
@@ -124,7 +108,7 @@ export default function archivos(): AstroIntegration {
             return;
           }
           const paquete = url.match(/^\/descargas\/([a-z0-9-]+)\.zip$/)?.[1];
-          if (paquete && PAQUETES.includes(paquete)) {
+          if (paquete && CARPETAS.includes(paquete)) {
             res.setHeader("Content-Type", "application/zip");
             res.end(zipDe(paquete));
             return;
@@ -142,8 +126,8 @@ export default function archivos(): AstroIntegration {
         }
         const descargas = new URL("descargas/", dir);
         fs.mkdirSync(descargas, { recursive: true });
-        for (const carpeta of PAQUETES) fs.writeFileSync(new URL(`${carpeta}.zip`, descargas), zipDe(carpeta));
-        logger.info(`${n} archivos en /archivos/ y ${PAQUETES.length} paquetes en /descargas/`);
+        for (const carpeta of CARPETAS) fs.writeFileSync(new URL(`${carpeta}.zip`, descargas), zipDe(carpeta));
+        logger.info(`${n} archivos en /archivos/ y ${CARPETAS.length} paquetes en /descargas/`);
       },
     },
   };

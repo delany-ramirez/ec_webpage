@@ -7,6 +7,7 @@
 import { getCollection, render } from "astro:content";
 import Curso from "../layouts/Curso.astro";
 import Cabecera from "../components/Cabecera.astro";
+import Paquete from "../components/Paquete.astro";
 import { docDeEntrada } from "../lib/curso";
 
 export async function getStaticPaths() {
@@ -27,6 +28,7 @@ const h1 = (entry.body ?? "").match(/^#\s+(.+?)\s*$/m)?.[1] ?? doc.titulo;
 
 <Curso title={doc.titulo} headings={headings} tipo="Documento">
   <Cabecera eyebrow={doc.grupo === "pre" ? "Pre-trabajos" : "Recursos"} titulo={h1} headings={headings} />
+  {doc.grupo === "pre" && doc.ruta !== "/pre-trabajos/diagnostico/" && <Paquete carpeta="pre-trabajos" />}
   <article class="prose rise d1">
     <Content />
   </article>

@@ -4,6 +4,8 @@ import IndiceCurso from "../components/IndiceCurso.astro";
 import { MODULOS, leccionesPorModulo, ejerciciosPorModulo } from "../lib/curso";
 import { modulosConAutoevaluacion } from "../lib/interactivos";
 import { notebooksDe } from "../lib/notebooks-fs";
+import { PAQUETES } from "../lib/paquetes";
+import Paquete from "../components/Paquete.astro";
 
 const porModulo = await leccionesPorModulo();
 const ejercicios = await ejerciciosPorModulo();
@@ -106,6 +108,21 @@ const RAA = [
             </a>
           );
         })}
+      </div>
+    </section>
+
+    <section class="block" id="descargas">
+      <div class="head">
+        <span class="eyebrow">Descargas</span>
+        <h2>Todo el material, en tres archivos</h2>
+        <p>
+          Descomprime cada <code>.zip</code> en una misma carpeta y ábrela en RStudio (o súbela a
+          Posit Cloud). Las prácticas leen los datos con rutas <code>../datos/</code>, así que
+          conserva la estructura de carpetas.
+        </p>
+      </div>
+      <div class="descargas">
+        {PAQUETES.map((p) => <Paquete carpeta={p.carpeta} variante="tarjeta" />)}
       </div>
     </section>
 
@@ -377,6 +394,21 @@ const RAA = [
     }
   }
 
+  .descargas {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+  .head p code {
+    font-family: var(--font-mono);
+    font-size: 0.9em;
+    color: var(--gold);
+  }
+  @media (max-width: 900px) {
+    .descargas {
+      grid-template-columns: 1fr;
+    }
+  }
   .programa {
     display: grid;
     grid-template-columns: 1.1fr 1fr;

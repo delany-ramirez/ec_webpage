@@ -1,0 +1,119 @@
+---
+/**
+ * Descarga de un paquete .zip (lib/paquetes.ts).
+ *   variante "franja"  — compacta, al inicio de las páginas de sesión, ejercicio y pre-trabajos
+ *   variante "tarjeta" — con título y uso, para la sección Descargas de la portada
+ */
+import { paquetePorCarpeta, resumenPaquete } from "../lib/paquetes";
+
+interface Props {
+  carpeta: string;
+  variante?: "franja" | "tarjeta";
+  /** Texto de la franja; por defecto el uso del paquete */
+  nota?: string;
+}
+const { carpeta, variante = "franja", nota } = Astro.props;
+const p = paquetePorCarpeta(carpeta);
+const resumen = p ? resumenPaquete(carpeta) : "";
+const archivo = `${carpeta}.zip`;
+---
+
+{p && variante === "franja" && (
+  <aside class="franja rise d1" aria-label={`Descargar material: ${p.titulo}`} data-pagefind-ignore>
+    <div class="f-txt">
+      <span class="f-et">Material para RStudio o Posit Cloud</span>
+      <span class="f-nota">{nota ?? p.uso}</span>
+      <span class="f-res">{archivo} · {resumen}</span>
+    </div>
+    <a class="btn btn-primary btn-sm f-btn" href={p.url} download={archivo}>
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M5 21h14" /></svg>
+      Descargar .zip
+    </a>
+  </aside>
+)}
+
+{p && variante === "tarjeta" && (
+  <div class="tarjeta">
+    <span class="t-zip">{archivo}</span>
+    <h3>{p.titulo}</h3>
+    <p>{p.uso}</p>
+    <span class="t-res">{resumen}</span>
+    <a class="btn btn-primary btn-sm t-btn" href={p.url} download={archivo}>
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M5 21h14" /></svg>
+      Descargar .zip
+    </a>
+  </div>
+)}
+
+<style>
+  .franja {
+    max-width: 72ch;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px 20px;
+    flex-wrap: wrap;
+    padding: 14px 18px;
+    margin-bottom: 32px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--gold);
+    border-radius: 12px;
+  }
+  .f-txt {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    flex: 1 1 300px;
+    min-width: 0;
+  }
+  .f-et {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--gold);
+  }
+  .f-nota {
+    font-size: 14px;
+    color: var(--text);
+  }
+  .f-res,
+  .t-res {
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    color: var(--muted-2);
+  }
+  .f-btn,
+  .t-btn {
+    gap: 6px;
+    white-space: nowrap;
+  }
+
+  .tarjeta {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 22px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+  }
+  .t-zip {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--gold);
+  }
+  .tarjeta h3 {
+    font-size: 18px;
+  }
+  .tarjeta p {
+    font-size: 14px;
+    color: var(--muted);
+    flex: 1;
+  }
+  .t-btn {
+    align-self: flex-start;
+    margin-top: 6px;
+  }
+</style>
