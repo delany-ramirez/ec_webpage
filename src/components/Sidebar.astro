@@ -301,6 +301,12 @@ const enPre = rutaActual.startsWith("/pre-trabajos/");
     line-height: 1.4;
     transition: background 0.2s, color 0.2s;
   }
+  /* Documentos de pre-trabajos: sin marca ni número, el título ocupa toda la fila,
+     alineado con la columna del número de las lecciones. */
+  .sb-leccion.sb-doc-lista {
+    grid-template-columns: 1fr;
+    padding-left: 26px;
+  }
   .sb-leccion:hover {
     background: var(--surface);
     color: var(--text);
