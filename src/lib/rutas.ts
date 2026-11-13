@@ -57,6 +57,7 @@ export interface Doc {
 export const DOCS: Record<string, Doc> = {
   "pre-trabajos/README": { ruta: "/pre-trabajos/", titulo: "Pre-trabajos", nav: "Calendario y entrega", grupo: "pre" },
   "pre-trabajos/00-instalacion-r": { ruta: "/pre-trabajos/instalacion/", titulo: "Instalación de R y RStudio", nav: "Instalación de R", grupo: "pre" },
+  "pre-trabajos/01-tutorial-r": { ruta: "/pre-trabajos/tutorial-r/", titulo: "Tutorial de R para el curso", nav: "Tutorial de R", grupo: "pre" },
   "pre-trabajos/diagnostico-entrada": { ruta: "/pre-trabajos/diagnostico/", titulo: "Diagnóstico de entrada", nav: "Diagnóstico de entrada", grupo: "pre" },
   "pre-trabajos/pre-trabajo-1": { ruta: "/pre-trabajos/1/", titulo: "Pre-trabajo 1", nav: "Pre-trabajo 1", grupo: "pre" },
   "pre-trabajos/pre-trabajo-2": { ruta: "/pre-trabajos/2/", titulo: "Pre-trabajo 2", nav: "Pre-trabajo 2", grupo: "pre" },

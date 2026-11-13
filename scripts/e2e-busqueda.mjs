@@ -53,7 +53,7 @@ await js(`document.getElementById('bq-input').dispatchEvent(new KeyboardEvent('k
 ok((await js(`document.querySelectorAll('#bq-resultados .bq-item.activo').length`)) === 1, "buscador: ↓ selecciona un resultado");
 // Pagefind hace coincidencia difusa: se prueban varias cadenas sin sentido hasta dar con una vacía.
 let vacioVisto = false, consultaVacia = "";
-for (const q of ["wvwvwv", "kjkjkj", "xqzjvp", "zzqxjkw"]) {
+for (const q of ["wvwvwv", "kjkjkj", "xqzjvp", "zzqxjkw", "qwzxqwzxqwzx", "jjjjvvvvqqqq"]) {
   await js(`(() => { const i = document.getElementById('bq-input'); i.value = ${JSON.stringify(q)}; i.dispatchEvent(new Event('input')); })()`);
   if (await hasta(`document.querySelector('#bq-resultados .bq-vacio') !== null`, 1500)) { vacioVisto = true; consultaVacia = q; break; }
 }
